@@ -19,9 +19,9 @@ export default function DataTable<T extends Record<string, any>>({
   emptyMessage = 'No records found.',
 }: DataTableProps<T>) {
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-slate-950/40">
-      <table className="w-full text-left text-sm text-slate-300">
-        <thead className="bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-white/10">
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <table className="w-full text-left text-sm text-slate-700">
+        <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-600 border-b border-slate-200">
           <tr>
             {columns.map((col, idx) => (
               <th key={idx} scope="col" className={`px-4 py-3.5 ${col.className || ''}`}>
@@ -30,12 +30,12 @@ export default function DataTable<T extends Record<string, any>>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody className="divide-y divide-slate-100">
           {data.length > 0 ? (
             data.map((row, rowIdx) => (
-              <tr key={rowIdx} className="hover:bg-white/[0.02] transition-colors">
+              <tr key={rowIdx} className="hover:bg-slate-50/80 transition-colors">
                 {columns.map((col, colIdx) => (
-                  <td key={colIdx} className={`px-4 py-3 text-slate-200 ${col.className || ''}`}>
+                  <td key={colIdx} className={`px-4 py-3.5 text-slate-700 ${col.className || ''}`}>
                     {col.cell ? col.cell(row) : col.accessorKey ? String(row[col.accessorKey] ?? '') : null}
                   </td>
                 ))}

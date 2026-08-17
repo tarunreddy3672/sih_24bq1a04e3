@@ -6,21 +6,16 @@ import {
   Camera,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
-  RefreshCw,
   Save,
   Users,
   ShieldCheck,
-  Zap,
   Play,
   Square,
-  Sparkles,
   Info,
 } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
 import Badge from '@/components/shared/Badge';
-import GlassCard from '@/components/shared/GlassCard';
 
 interface EnrolledStudent {
   _id: string;
@@ -44,7 +39,6 @@ export default function FacultyAttendancePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Enrolled student roster
   const [students, setStudents] = useState<EnrolledStudent[]>([
     {
       _id: '64f1a2b3c4d5e6f7a8b9c001',
@@ -78,7 +72,6 @@ export default function FacultyAttendancePage() {
     },
   ]);
 
-  // Check face-api models availability
   useEffect(() => {
     async function checkModelWeights() {
       try {
@@ -97,7 +90,6 @@ export default function FacultyAttendancePage() {
     checkModelWeights();
   }, []);
 
-  // Handle webcam
   const startCamera = async () => {
     setCameraError('');
     try {
@@ -173,38 +165,37 @@ export default function FacultyAttendancePage() {
   };
 
   const presentCount = students.filter((s) => s.status === 'present').length;
-  const absentCount = students.filter((s) => s.status === 'absent').length;
 
   return (
-    <div className="flex min-h-screen bg-[#070B14] text-slate-100">
+    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
       <Sidebar role="faculty" />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Biometric Attendance Terminal" roleBadge="FACULTY" />
+        <Topbar title="Class Attendance Terminal" roleBadge="FACULTY" />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
           {/* Top Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-indigo-400 live-indicator" />
-                <span className="text-xs font-mono uppercase tracking-wider text-indigo-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 live-indicator" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                   Digital Electronics & VLSI • Lecture Session 14
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                Computer Vision Attendance Verification
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Biometric Attendance Verification
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
-                Present: <strong className="text-emerald-400">{presentCount}</strong> / {students.length}
+              <span className="text-xs font-mono px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                Present: <strong className="text-emerald-700">{presentCount}</strong> / {students.length}
               </span>
               <button
                 onClick={handleCommitAttendance}
                 disabled={isSaving}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 <span>{isSaving ? 'Submitting...' : 'Commit Attendance'}</span>
@@ -212,44 +203,43 @@ export default function FacultyAttendancePage() {
             </div>
           </div>
 
-          {/* Institutional Consent Notice (Section 24) */}
-          <div className="glass-panel p-4 rounded-2xl border border-cyan-500/30 bg-cyan-950/20 flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-200">
-              <strong className="text-cyan-300 block mb-0.5">Biometric Ethics & Consent Notice</strong>
+          {/* Institutional Consent Notice */}
+          <div className="study-card p-4 border-indigo-200 bg-indigo-50/40 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-slate-700">
+              <strong className="text-indigo-900 block mb-0.5">Biometric Ethics & Consent Notice</strong>
               Face recognition is used only for attendance verification. Please ensure students have provided appropriate consent according to your institution's policy. All descriptor calculations occur locally within the browser context.
             </div>
           </div>
 
-          {/* Model Weights Fallback Alert (Section 22) */}
+          {/* Model Weights Fallback Alert */}
           {!modelsLoaded && !checkingModels && (
-            <div className="glass-panel p-4 rounded-2xl border border-amber-500/30 bg-amber-950/20 flex items-start gap-3">
-              <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-              <div className="text-xs text-slate-300">
-                <strong className="text-amber-300 block mb-0.5">Model Status Notice</strong>
-                Face recognition models not loaded from <code className="text-cyan-300 font-mono">public/models/</code>. Operating in real-time descriptor simulation mode with full manual override capability.
+            <div className="study-card p-4 border-amber-200 bg-amber-50/40 flex items-start gap-3">
+              <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-700">
+                <strong className="text-amber-800 block mb-0.5">Model Status Notice</strong>
+                Face recognition models not loaded from <code className="text-indigo-700 font-mono">public/models/</code>. Operating in real-time descriptor simulation mode with full manual override capability.
               </div>
             </div>
           )}
 
           {saveSuccess && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2"
+              className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2"
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Attendance recorded successfully to MongoDB. Telemetry updated for institutional dashboard.</span>
             </motion.div>
           )}
 
           {/* Main 2-Column Split Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Live Camera Feed */}
+            {/* Left Column: Camera Feed */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="glass-panel rounded-2xl p-5 border border-white/10 flex flex-col justify-between h-[440px] relative overflow-hidden">
-                {/* Camera Viewport */}
-                <div className="relative w-full h-full rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden">
+              <div className="study-card p-5 flex flex-col justify-between h-[440px] relative overflow-hidden bg-white">
+                <div className="relative w-full h-full rounded-xl bg-slate-900 border border-slate-200 flex items-center justify-center overflow-hidden">
                   <video
                     ref={videoRef}
                     autoPlay
@@ -260,19 +250,18 @@ export default function FacultyAttendancePage() {
 
                   {/* Recognition Scanning HUD Overlay */}
                   {isCameraActive && isScanning && (
-                    <div className="absolute inset-0 pointer-events-none border-2 border-cyan-400/30 m-4 rounded-2xl flex flex-col justify-between p-4">
-                      {/* Bounding box animation */}
-                      <div className="w-40 h-40 border-2 border-cyan-400/80 rounded-xl mx-auto my-auto relative flex items-center justify-center">
-                        <div className="absolute -top-6 left-0 bg-cyan-500/90 text-slate-950 font-mono text-[10px] font-bold px-2 py-0.5 rounded">
+                    <div className="absolute inset-0 pointer-events-none border-2 border-indigo-400/40 m-4 rounded-2xl flex flex-col justify-between p-4">
+                      <div className="w-40 h-40 border-2 border-indigo-400 rounded-xl mx-auto my-auto relative flex items-center justify-center">
+                        <div className="absolute -top-6 left-0 bg-indigo-600 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded">
                           MATCH: AARAV SHARMA (98%)
                         </div>
-                        <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent absolute animate-bounce" />
+                        <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent absolute animate-bounce" />
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] font-mono text-cyan-300 bg-slate-950/80 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-white bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700">
                         <span className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-cyan-400 live-indicator" />
-                          68 LANDMARKS GENERATED
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 live-indicator" />
+                          68 LANDMARKS DETECTED
                         </span>
                         <span>CONFIDENCE: 98.4%</span>
                       </div>
@@ -281,12 +270,12 @@ export default function FacultyAttendancePage() {
 
                   {!isCameraActive && (
                     <div className="text-center p-6 space-y-3">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mx-auto text-slate-400">
                         <Camera className="w-7 h-7" />
                       </div>
-                      <h3 className="text-sm font-semibold text-white">Camera Standby</h3>
-                      <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                        Activate the optical stream to run real-time facial descriptor comparison against enrolled student embeddings.
+                      <h3 className="text-sm font-semibold text-white">Camera Feed Inactive</h3>
+                      <p className="text-xs text-slate-300 max-w-xs mx-auto">
+                        Activate camera stream to compare student facial descriptors against enrolled vector embeddings.
                       </p>
                     </div>
                   )}
@@ -298,7 +287,7 @@ export default function FacultyAttendancePage() {
                     {!isCameraActive ? (
                       <button
                         onClick={startCamera}
-                        className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20"
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs"
                       >
                         <Play className="w-3.5 h-3.5" />
                         <span>Start Camera Stream</span>
@@ -306,7 +295,7 @@ export default function FacultyAttendancePage() {
                     ) : (
                       <button
                         onClick={stopCamera}
-                        className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold text-xs flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs flex items-center gap-1.5"
                       >
                         <Square className="w-3.5 h-3.5" />
                         <span>Stop Camera</span>
@@ -314,8 +303,8 @@ export default function FacultyAttendancePage() {
                     )}
                   </div>
 
-                  <span className="text-[11px] font-mono text-slate-400">
-                    Engine: <strong className="text-cyan-400">face-api.js</strong>
+                  <span className="text-[11px] text-slate-500 font-mono">
+                    Engine: <strong className="text-indigo-600">face-api.js</strong>
                   </span>
                 </div>
               </div>
@@ -323,12 +312,12 @@ export default function FacultyAttendancePage() {
 
             {/* Right Column: Live Recognition Roster */}
             <div className="lg:col-span-5 space-y-4">
-              <div className="glass-panel rounded-2xl p-6 border border-white/10 flex flex-col justify-between h-[440px]">
+              <div className="study-card p-6 flex flex-col justify-between h-[440px]">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Users className="w-4 h-4 text-indigo-400" />
-                      Live Match Telemetry (CSE-A)
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Users className="w-4 h-4 text-indigo-600" />
+                      Class Roster Verification (CSE-A)
                     </h3>
                     <Badge variant="indigo" size="sm">
                       {students.length} Enrolled
@@ -341,18 +330,18 @@ export default function FacultyAttendancePage() {
                       return (
                         <div
                           key={student._id}
-                          className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 hover:border-slate-700 flex items-center justify-between gap-3 transition-all"
+                          className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 flex items-center justify-between gap-3 transition-all"
                         >
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-white">{student.name}</h4>
+                              <h4 className="text-xs font-bold text-slate-900">{student.name}</h4>
                               {student.manualOverride && (
-                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono">
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono">
                                   Manual
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-slate-400 font-mono">
+                            <p className="text-[10px] text-slate-500 font-mono">
                               Match Confidence: {student.confidenceScore}%
                             </p>
                           </div>
@@ -362,18 +351,18 @@ export default function FacultyAttendancePage() {
                               onClick={() => toggleStudentStatus(student._id)}
                               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                                 isPresent
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                  : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
+                                  : 'bg-rose-50 text-rose-700 border border-rose-300'
                               }`}
                             >
                               {isPresent ? (
                                 <>
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                   <span>Present</span>
                                 </>
                               ) : (
                                 <>
-                                  <XCircle className="w-3.5 h-3.5 text-red-400" />
+                                  <XCircle className="w-3.5 h-3.5 text-rose-600" />
                                   <span>Absent</span>
                                 </>
                               )}
@@ -385,9 +374,9 @@ export default function FacultyAttendancePage() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                   <span>Click badge to manually override status</span>
-                  <span className="font-mono text-cyan-400">Ready for sync</span>
+                  <span className="font-mono text-indigo-600 font-semibold">Ready to commit</span>
                 </div>
               </div>
             </div>

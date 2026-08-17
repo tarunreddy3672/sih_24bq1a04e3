@@ -7,17 +7,9 @@ import {
   Users,
   CalendarCheck,
   Award,
-  Sparkles,
-  TrendingUp,
   Activity,
   Flame,
-  Search,
-  ExternalLink,
   ChevronRight,
-  RefreshCw,
-  Clock,
-  Layers,
-  Star,
   CheckCircle2,
 } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
@@ -26,7 +18,6 @@ import StatCard from '@/components/dashboard/StatCard';
 import WowInsightCard from '@/components/dashboard/WowInsightCard';
 import StudentDrilldownModal from '@/components/dashboard/StudentDrilldownModal';
 import Badge from '@/components/shared/Badge';
-import GlassCard from '@/components/shared/GlassCard';
 import {
   AreaChart,
   Area,
@@ -41,10 +32,8 @@ import {
 export default function AdminControlTowerPage() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isDrilldownOpen, setIsDrilldownOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'classes' | 'leaderboard'>('overview');
   const [actionSuccess, setActionSuccess] = useState(false);
 
-  // Institution Telemetry State
   const [analytics, setAnalytics] = useState({
     totalStudents: 480,
     totalFaculty: 32,
@@ -110,46 +99,46 @@ export default function AdminControlTowerPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#070B14] text-slate-100">
+    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
       <Sidebar role="admin" />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Institutional Command Control Tower" roleBadge="ADMIN" />
+        <Topbar title="Institutional Control Tower" roleBadge="ADMIN" />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 overflow-y-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 live-indicator" />
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
-                  Campus 360 Telemetry Online • Smart India Hackathon Demonstration Build
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 live-indicator" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                  Campus-Wide Academic Telemetry • SIH 2026 Edition
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Institution Operations & Intelligence Terminal
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Academic Operations & Institutional Overview
               </h1>
             </div>
 
             <div className="flex items-center gap-2">
               <Badge variant="amber" size="md" dot>
-                {analytics.activeClassesCount} Active Class Sessions Live
+                {analytics.activeClassesCount} Active Class Sessions
               </Badge>
             </div>
           </div>
 
           {actionSuccess && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2"
+              className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2"
             >
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>Remediation Directive Dispatched! Automated check-in reminders queued for Section CSE-B students.</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Advisory action initiated! Automated check-in reminders queued for Section CSE-B students.</span>
             </motion.div>
           )}
 
-          {/* 1. THE WOW INSIGHT CARD (Section 33 - Priority #1) */}
+          {/* 1. THE WOW INSIGHT CARD */}
           <WowInsightCard
             onTriggerAction={handleExecuteDirective}
           />
@@ -159,15 +148,15 @@ export default function AdminControlTowerPage() {
             <StatCard
               title="Total Enrolled Students"
               value={analytics.totalStudents}
-              subtitle="4 Engineering Departments"
+              subtitle="4 Academic Engineering Branches"
               icon={Users}
-              trend={{ value: '100% Biometric Enrolled', isPositive: true }}
-              accentColor="cyan"
+              trend={{ value: '100% Enrolled', isPositive: true }}
+              accentColor="indigo"
             />
             <StatCard
               title="Campus Attendance"
               value={`${analytics.averageAttendance}%`}
-              subtitle="+1.8% vs last week"
+              subtitle="+1.8% vs previous period"
               icon={CalendarCheck}
               trend={{ value: '1.8%', isPositive: true }}
               accentColor="emerald"
@@ -175,15 +164,15 @@ export default function AdminControlTowerPage() {
             <StatCard
               title="Average Quiz Score"
               value={`${analytics.averageQuizScore}%`}
-              subtitle="Aggregated across 845 attempts"
+              subtitle="Aggregated across 845 assessments"
               icon={Award}
               trend={{ value: '3.2%', isPositive: true }}
-              accentColor="indigo"
+              accentColor="cyan"
             />
             <StatCard
-              title="Active Faculty On-Duty"
+              title="Faculty On-Duty"
               value={analytics.totalFaculty}
-              subtitle="6 Live Biometric Terminals"
+              subtitle="6 Active Lecture Theatres"
               icon={Activity}
               accentColor="amber"
             />
@@ -193,14 +182,14 @@ export default function AdminControlTowerPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-emerald-400" />
-                  Real-Time Classroom Telemetry Stream
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-600" />
+                  Real-Time Classroom Attendance Status
                 </h3>
-                <p className="text-xs text-slate-400">Live biometric attendance feeds verified per lecture block</p>
+                <p className="text-xs text-slate-500">Live biometric attendance feeds verified per lecture block</p>
               </div>
-              <span className="text-xs font-mono text-cyan-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 live-indicator" />
+              <span className="text-xs font-medium text-indigo-700 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 live-indicator" />
                 Live Sync (3s Interval)
               </span>
             </div>
@@ -211,22 +200,22 @@ export default function AdminControlTowerPage() {
                 return (
                   <div
                     key={cls.id}
-                    className={`glass-panel p-5 rounded-2xl border transition-all ${
+                    className={`study-card p-5 study-card-hover transition-all ${
                       isUnderperforming
-                        ? 'border-amber-500/40 bg-amber-950/10'
-                        : 'border-white/10 hover:border-cyan-500/30'
+                        ? 'border-amber-300 bg-amber-50/30'
+                        : 'border-slate-200 bg-white'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
                           {cls.class}
                         </span>
-                        <h4 className="text-sm font-bold text-white leading-tight">{cls.subject}</h4>
-                        <p className="text-xs text-slate-400">{cls.faculty}</p>
+                        <h4 className="text-sm font-bold text-slate-900 leading-tight">{cls.subject}</h4>
+                        <p className="text-xs text-slate-500">{cls.faculty}</p>
                       </div>
                       <Badge
-                        variant={cls.status === 'Active' ? 'emerald' : cls.status === 'Upcoming' ? 'cyan' : 'slate'}
+                        variant={cls.status === 'Active' ? 'emerald' : cls.status === 'Upcoming' ? 'indigo' : 'slate'}
                         size="sm"
                         dot={cls.status === 'Active'}
                       >
@@ -237,26 +226,26 @@ export default function AdminControlTowerPage() {
                     {/* Attendance Bar */}
                     <div className="my-3 space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-slate-300">
+                        <span className="text-slate-600">
                           {cls.present} / {cls.total} Present
                         </span>
-                        <span className={`font-bold ${cls.attendancePercent >= 85 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        <span className={`font-bold ${cls.attendancePercent >= 85 ? 'text-emerald-700' : 'text-amber-700'}`}>
                           {cls.attendancePercent}%
                         </span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
-                            cls.attendancePercent >= 85 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-amber-500 to-orange-400'
+                            cls.attendancePercent >= 85 ? 'bg-emerald-500' : 'bg-amber-500'
                           }`}
                           style={{ width: `${cls.attendancePercent}%` }}
                         />
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-white/5">
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
                       <span>Absent: {cls.absent} students</span>
-                      {isUnderperforming && <span className="text-amber-400 font-semibold">Flagged Anomaly</span>}
+                      {isUnderperforming && <span className="text-amber-700 font-semibold">Flagged for Review</span>}
                     </div>
                   </div>
                 );
@@ -267,13 +256,13 @@ export default function AdminControlTowerPage() {
           {/* 4. Institutional Analytics: Attendance Trends & Quiz Performance */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Attendance Trend Chart */}
-            <div className="lg:col-span-6 glass-panel rounded-2xl p-6 border border-white/10">
+            <div className="lg:col-span-6 study-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white">Campus-Wide Attendance Trend</h3>
-                  <p className="text-xs text-slate-400">Weekly trajectory across all 6 sections</p>
+                  <h3 className="text-sm font-bold text-slate-900">Campus-Wide Attendance Trend</h3>
+                  <p className="text-xs text-slate-500">Weekly trajectory across all 6 sections</p>
                 </div>
-                <Badge variant="cyan" size="sm">
+                <Badge variant="indigo" size="sm">
                   Target: &gt;90%
                 </Badge>
               </div>
@@ -282,33 +271,35 @@ export default function AdminControlTowerPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analytics.attendanceTrends} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorAdminAtt" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00F0FF" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#00F0FF" stopOpacity={0.0} />
+                      <linearGradient id="colorAdminAttLight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="date" stroke="#64748B" fontSize={11} />
-                    <YAxis domain={[75, 100]} stroke="#64748B" fontSize={11} />
+                    <XAxis dataKey="date" stroke="#94A3B8" fontSize={11} />
+                    <YAxis domain={[75, 100]} stroke="#94A3B8" fontSize={11} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0F172A',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: '#FFFFFF',
+                        borderColor: '#E2E8F0',
                         borderRadius: '12px',
                         fontSize: '12px',
+                        color: '#0F172A',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                       }}
                     />
-                    <Area type="monotone" dataKey="attendance" stroke="#00F0FF" strokeWidth={2} fillOpacity={1} fill="url(#colorAdminAtt)" />
+                    <Area type="monotone" dataKey="attendance" stroke="#4F46E5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAdminAttLight)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Quiz Performance by Subject */}
-            <div className="lg:col-span-6 glass-panel rounded-2xl p-6 border border-white/10">
+            <div className="lg:col-span-6 study-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-white">Diagnostic Score by Discipline</h3>
-                  <p className="text-xs text-slate-400">Average MCQ mastery rates</p>
+                  <h3 className="text-sm font-bold text-slate-900">Diagnostic Score by Discipline</h3>
+                  <p className="text-xs text-slate-500">Average MCQ mastery rates</p>
                 </div>
                 <Badge variant="indigo" size="sm">
                   Mean: 84.2%
@@ -318,17 +309,19 @@ export default function AdminControlTowerPage() {
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={analytics.quizPerformance} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                    <XAxis dataKey="subject" stroke="#64748B" fontSize={10} />
-                    <YAxis domain={[50, 100]} stroke="#64748B" fontSize={11} />
+                    <XAxis dataKey="subject" stroke="#94A3B8" fontSize={10} />
+                    <YAxis domain={[50, 100]} stroke="#94A3B8" fontSize={11} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0F172A',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: '#FFFFFF',
+                        borderColor: '#E2E8F0',
                         borderRadius: '12px',
                         fontSize: '12px',
+                        color: '#0F172A',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                       }}
                     />
-                    <Bar dataKey="averageScore" fill="#6366F1" radius={[6, 6, 0, 0]} name="Avg Score %" />
+                    <Bar dataKey="averageScore" fill="#4F46E5" radius={[6, 6, 0, 0]} name="Avg Score %" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -336,19 +329,19 @@ export default function AdminControlTowerPage() {
           </div>
 
           {/* 5. Streak Leaderboard & Student Drill-Down Trigger */}
-          <div className="glass-panel rounded-2xl p-6 border border-white/10 space-y-4">
+          <div className="study-card p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-orange-400" />
-                  Campus Streak & Consistency Champions
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-amber-500" />
+                  Academic Consistency & Streak Leaders
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Click any student name to inspect authorized telemetry dossier and weak topics
+                <p className="text-xs text-slate-500">
+                  Click any student name to inspect authorized academic dossier and weak topics
                 </p>
               </div>
 
-              <span className="text-xs text-cyan-400 font-mono">
+              <span className="text-xs text-indigo-700 font-semibold">
                 Top 5 High-Consistency Scholars
               </span>
             </div>
@@ -358,27 +351,27 @@ export default function AdminControlTowerPage() {
                 <div
                   key={idx}
                   onClick={() => handleOpenStudentDrilldown(student.id)}
-                  className="p-4 rounded-xl bg-slate-950/70 border border-white/10 hover:border-cyan-400/50 hover:bg-slate-900 cursor-pointer transition-all flex flex-col justify-between group"
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 cursor-pointer transition-all flex flex-col justify-between group"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="w-5 h-5 rounded-md bg-slate-800 text-slate-300 flex items-center justify-center text-[10px] font-mono font-bold">
+                      <span className="w-5 h-5 rounded-md bg-white border border-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-mono font-bold shadow-2xs">
                         #{idx + 1}
                       </span>
-                      <span className="text-[10px] font-mono text-cyan-400">{student.classOrSubject}</span>
+                      <span className="text-[10px] font-semibold text-indigo-700">{student.classOrSubject}</span>
                     </div>
-                    <h4 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">
+                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                       {student.name}
                     </h4>
-                    <p className="text-[11px] font-mono font-bold text-orange-400 flex items-center gap-1 mt-1">
-                      <Flame className="w-3 h-3 fill-orange-400 text-orange-400" />
+                    <p className="text-[11px] font-bold text-amber-700 flex items-center gap-1 mt-1 font-mono">
+                      <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                       {student.streak} Days
                     </p>
                   </div>
 
-                  <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400">
-                    <span>Inspect Dossier</span>
-                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+                    <span>Inspect Profile</span>
+                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-slate-400" />
                   </div>
                 </div>
               ))}

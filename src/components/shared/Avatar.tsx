@@ -22,17 +22,17 @@ export default function Avatar({ name, role, size = 'md' }: AvatarProps) {
     lg: 'w-12 h-12 text-base',
   };
 
-  const roleGradients: Record<string, string> = {
-    student: 'from-cyan-500 to-blue-600 border-cyan-400/40',
-    faculty: 'from-indigo-500 to-purple-600 border-indigo-400/40',
-    admin: 'from-amber-500 to-orange-600 border-amber-400/40',
+  const roleStyles: Record<string, string> = {
+    student: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    faculty: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    admin: 'bg-amber-100 text-amber-800 border-amber-200',
   };
 
-  const gradient = roleGradients[role || 'student'] || 'from-slate-700 to-slate-800 border-slate-600';
+  const style = roleStyles[role || 'student'] || 'bg-slate-100 text-slate-700 border-slate-200';
 
   return (
     <div
-      className={`rounded-full bg-gradient-to-tr ${gradient} border flex items-center justify-center font-bold text-white shadow-md ${sizeClasses[size]}`}
+      className={`rounded-full ${style} border flex items-center justify-center font-bold shadow-sm ${sizeClasses[size]}`}
     >
       {initials}
     </div>

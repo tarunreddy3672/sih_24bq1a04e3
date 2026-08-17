@@ -8,14 +8,10 @@ import {
   Save,
   Eye,
   CheckCircle2,
-  Sparkles,
   BookOpen,
-  HelpCircle,
-  ArrowRight,
 } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
-import Badge from '@/components/shared/Badge';
 import Modal from '@/components/shared/Modal';
 
 interface QuizQuestionDraft {
@@ -96,7 +92,6 @@ export default function FacultyQuizCreatePage() {
 
   const handleSaveQuiz = async () => {
     setErrorMessage('');
-    // Validation
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       if (!q.question.trim()) {
@@ -140,23 +135,23 @@ export default function FacultyQuizCreatePage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#070B14] text-slate-100">
+    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
       <Sidebar role="faculty" />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Assessment Creator Suite" roleBadge="FACULTY" />
+        <Topbar title="Assessment Authoring Suite" roleBadge="FACULTY" />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl space-y-6 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl space-y-6 overflow-y-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-indigo-400 live-indicator" />
-                <span className="text-xs font-mono uppercase tracking-wider text-indigo-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 live-indicator" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                   MCQ Diagnostic Authoring System
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                 Create Timed Assessment
               </h1>
             </div>
@@ -165,9 +160,9 @@ export default function FacultyQuizCreatePage() {
               <button
                 type="button"
                 onClick={() => setPreviewOpen(true)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="w-4 h-4 text-slate-500" />
                 <span>Preview Quiz</span>
               </button>
 
@@ -175,7 +170,7 @@ export default function FacultyQuizCreatePage() {
                 type="button"
                 onClick={handleSaveQuiz}
                 disabled={saving}
-                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? 'Publishing...' : 'Publish to Students'}</span>
@@ -184,32 +179,32 @@ export default function FacultyQuizCreatePage() {
           </div>
 
           {errorMessage && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
               {errorMessage}
             </div>
           )}
 
           {saveSuccess && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Assessment published successfully to MongoDB! Students can now take this quiz.</span>
             </div>
           )}
 
           {/* Subject Meta Selection */}
-          <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="study-card p-6 space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Quiz Metadata
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Academic Subject
                 </label>
                 <select
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-slate-950/80 border border-slate-800 focus:border-cyan-500 rounded-xl px-4 py-2.5 text-xs text-slate-200 outline-none"
+                  className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 >
                   <option value="Digital Electronics">Digital Electronics & VLSI</option>
                   <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
@@ -219,14 +214,14 @@ export default function FacultyQuizCreatePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Target Student Cohort
                 </label>
                 <input
                   type="text"
                   disabled
                   value="Section CSE-A (Enrolled: 60 Students)"
-                  className="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-400 outline-none font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-500 outline-none font-mono"
                 />
               </div>
             </div>
@@ -237,17 +232,17 @@ export default function FacultyQuizCreatePage() {
             {questions.map((q, qIdx) => (
               <div
                 key={qIdx}
-                className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 relative"
+                className="study-card p-6 space-y-4 relative"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-cyan-400">
+                  <span className="text-xs font-mono font-bold text-indigo-700">
                     QUESTION {qIdx + 1}
                   </span>
                   {questions.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveQuestion(qIdx)}
-                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs flex items-center gap-1 transition-colors"
+                      className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs flex items-center gap-1 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Remove</span>
@@ -256,7 +251,7 @@ export default function FacultyQuizCreatePage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Question Stem
                   </label>
                   <textarea
@@ -264,13 +259,13 @@ export default function FacultyQuizCreatePage() {
                     value={q.question}
                     onChange={(e) => handleQuestionTextChange(qIdx, e.target.value)}
                     placeholder="Enter the conceptual question or derivation problem..."
-                    className="w-full bg-slate-950/80 border border-slate-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-500 outline-none"
+                    className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl p-3 text-xs text-slate-900 placeholder-slate-400 outline-none"
                   />
                 </div>
 
                 {/* 4 Options Grid */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-medium text-slate-300">
+                  <label className="block text-xs font-semibold text-slate-700">
                     4 Multiple Choice Options (Select radio button for correct answer)
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -280,7 +275,7 @@ export default function FacultyQuizCreatePage() {
                         <div
                           key={optIdx}
                           className={`p-3 rounded-xl border flex items-center gap-2 transition-all ${
-                            isCorrect ? 'border-emerald-500/60 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'
+                            isCorrect ? 'border-emerald-300 bg-emerald-50/70 ring-2 ring-emerald-500/20' : 'border-slate-200 bg-slate-50'
                           }`}
                         >
                           <input
@@ -288,9 +283,9 @@ export default function FacultyQuizCreatePage() {
                             name={`correct-${qIdx}`}
                             checked={isCorrect}
                             onChange={() => handleCorrectAnswerChange(qIdx, optIdx)}
-                            className="w-4 h-4 accent-emerald-500 cursor-pointer"
+                            className="w-4 h-4 accent-emerald-600 cursor-pointer"
                           />
-                          <span className="font-mono text-xs font-bold text-slate-400 w-4">
+                          <span className="font-mono text-xs font-bold text-slate-500 w-4">
                             {String.fromCharCode(65 + optIdx)}:
                           </span>
                           <input
@@ -298,7 +293,7 @@ export default function FacultyQuizCreatePage() {
                             value={opt}
                             onChange={(e) => handleOptionChange(qIdx, optIdx, e.target.value)}
                             placeholder={`Option ${String.fromCharCode(65 + optIdx)} text...`}
-                            className="flex-1 bg-transparent text-xs text-slate-200 outline-none"
+                            className="flex-1 bg-transparent text-xs text-slate-900 outline-none"
                           />
                         </div>
                       );
@@ -308,15 +303,15 @@ export default function FacultyQuizCreatePage() {
 
                 {/* Topic Tag */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Specific Topic / Concept Tag (Used by AI for Diagnostic Weak-Topic Remediation)
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Specific Concept Tag (Used by AI for Diagnostic Weak-Topic Remediation)
                   </label>
                   <input
                     type="text"
                     value={q.topic}
                     onChange={(e) => handleTopicChange(qIdx, e.target.value)}
                     placeholder="e.g. MOSFET Biasing, CMOS Inverter Delay, Balanced BST"
-                    className="w-full bg-slate-950/80 border border-slate-800 focus:border-cyan-500 rounded-xl px-4 py-2 text-xs text-slate-200 placeholder-slate-500 outline-none"
+                    className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl px-4 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none"
                   />
                 </div>
               </div>
@@ -327,7 +322,7 @@ export default function FacultyQuizCreatePage() {
           <button
             type="button"
             onClick={handleAddQuestion}
-            className="w-full py-3 rounded-2xl border border-dashed border-cyan-500/40 hover:border-cyan-400 bg-cyan-500/5 hover:bg-cyan-500/10 text-cyan-300 font-semibold text-xs flex items-center justify-center gap-2 transition-all"
+            className="w-full py-3 rounded-2xl border border-dashed border-indigo-300 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Add Another Question</span>
@@ -345,8 +340,8 @@ export default function FacultyQuizCreatePage() {
       >
         <div className="space-y-4 text-xs">
           {questions.map((q, i) => (
-            <div key={i} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-              <p className="font-semibold text-white">
+            <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <p className="font-semibold text-slate-900">
                 {i + 1}. {q.question || '(Question text blank)'}
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -355,15 +350,15 @@ export default function FacultyQuizCreatePage() {
                     key={optIdx}
                     className={`p-2 rounded-lg border text-[11px] ${
                       q.correctAnswer === optIdx
-                        ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-semibold'
-                        : 'border-slate-800 text-slate-400'
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold'
+                        : 'border-slate-200 text-slate-600 bg-white'
                     }`}
                   >
                     {String.fromCharCode(65 + optIdx)}: {opt || '(Blank)'}
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-cyan-400 font-mono">Topic Tag: {q.topic || 'Unassigned'}</p>
+              <p className="text-[10px] text-indigo-700 font-mono">Topic Tag: {q.topic || 'Unassigned'}</p>
             </div>
           ))}
         </div>

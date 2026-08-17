@@ -1,85 +1,98 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #070B14;
-  --bg-card: rgba(15, 23, 42, 0.75);
-  --bg-card-hover: rgba(30, 41, 59, 0.85);
-  --border-glow: rgba(56, 189, 248, 0.2);
-  --accent-cyan: #00F0FF;
-  --accent-blue: #3B82F6;
-  --accent-indigo: #6366F1;
+  --bg-main: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --border-light: #E2E8F0;
+  --border-focus: #6366F1;
+  --accent-primary: #4F46E5;
+  --accent-secondary: #0EA5E9;
+  --accent-emerald: #10B981;
+  --accent-amber: #F59E0B;
 }
 
 body {
-  background-color: var(--bg-main);
-  color: #F1F5F9;
+  background-color: #F8FAFC;
+  color: #0F172A;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* Custom modern scrollbars */
+/* Custom pleasant scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0F19;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94A3B8;
 }
 
-/* Glassmorphism card utilities */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+/* Study-friendly soft card surfaces */
+.study-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  border-radius: 1rem;
 }
 
-.glass-panel-glow {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.08);
+.study-card-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #00F0FF 0%, #3B82F6 50%, #A855F7 100%);
+.study-card-hover:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+  transform: translateY(-2px);
+}
+
+.study-card-highlight {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border: 1px solid #C7D2FE;
+  box-shadow: 0 8px 30px -4px rgba(79, 70, 229, 0.08);
+}
+
+/* Academic text gradients */
+.text-gradient-academic {
+  background: linear-gradient(135deg, #312E81 0%, #4F46E5 50%, #0284C7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-gold {
-  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 50%, #EF4444 100%);
+.text-gradient-warm {
+  background: linear-gradient(135deg, #B45309 0%, #D97706 50%, #DC2626 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Subtle grid backdrop for technical feel */
-.tech-grid-bg {
-  background-image: radial-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
+/* Subtle academic paper grid pattern */
+.study-grid-bg {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Radar pulse animation for Control Tower live indicators */
-@keyframes radar-pulse {
+/* Soft pulsing live indicator */
+@keyframes soft-pulse {
   0% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
   }
   70% {
     transform: scale(1);
-    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
   }
   100% {
     transform: scale(0.95);
@@ -88,5 +101,5 @@ body {
 }
 
 .live-indicator {
-  animation: radar-pulse 2s infinite;
+  animation: soft-pulse 2s infinite;
 }

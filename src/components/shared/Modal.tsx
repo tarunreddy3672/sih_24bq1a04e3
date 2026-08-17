@@ -53,7 +53,7 @@ export default function Modal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
           />
 
           <motion.div
@@ -61,16 +61,16 @@ export default function Modal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
-            className={`relative w-full ${widthMap[maxWidth]} glass-panel rounded-2xl border border-white/10 shadow-2xl p-6 z-10 max-h-[90vh] flex flex-col`}
+            className={`relative w-full ${widthMap[maxWidth]} bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 z-10 max-h-[90vh] flex flex-col`}
           >
-            <div className="flex items-start justify-between pb-4 border-b border-white/10 shrink-0">
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
-                {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h3>
+                {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

@@ -15,10 +15,12 @@ export default function GlassCard({
 }: GlassCardProps) {
   return (
     <div
-      className={`rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
-        glow ? 'glass-panel-glow' : 'glass-panel'
+      className={`rounded-2xl p-5 sm:p-6 transition-all duration-200 ${
+        glow
+          ? 'study-card-highlight'
+          : 'study-card'
       } ${
-        hoverEffect ? 'hover:border-cyan-500/30 hover:shadow-cyan-500/10 hover:-translate-y-0.5' : ''
+        hoverEffect ? 'study-card-hover' : ''
       } ${className}`}
     >
       {children}

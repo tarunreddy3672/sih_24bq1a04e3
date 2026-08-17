@@ -6,8 +6,8 @@ import SessionProvider from '@/components/shared/SessionProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'EduVision AI — Smart Education Intelligence Platform | SIH 2026',
-  description: 'AI-Powered Education Dashboard, Attendance Intelligence, Adaptive Learning, and Institutional Control Tower.',
+  title: 'EduVision — Smart Academic Intelligence Platform | SIH 2026',
+  description: 'Clean, intelligent academic dashboard for student learning, attendance tracking, and institutional insights.',
 };
 
 export default function RootLayout({
@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark h-full">
-      <body className={`${inter.className} bg-[#070B14] text-slate-100 min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200`}>
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} bg-[#F8FAFC] text-slate-900 min-h-screen antialiased selection:bg-indigo-500/20 selection:text-indigo-900`}>
         <SessionProvider>
           {children}
         </SessionProvider>

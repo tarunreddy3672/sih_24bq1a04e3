@@ -12,7 +12,7 @@ export default function ProgressRing({
   percentage,
   size = 120,
   strokeWidth = 10,
-  color = '#00F0FF',
+  color = '#4F46E5',
   label,
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
@@ -27,7 +27,7 @@ export default function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgba(255, 255, 255, 0.08)"
+          stroke="#E2E8F0"
           strokeWidth={strokeWidth}
           fill="transparent"
         />
@@ -45,8 +45,8 @@ export default function ProgressRing({
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center text-center">
-        <span className="text-xl font-bold text-white font-mono">{clamped}%</span>
-        {label && <span className="text-[10px] text-slate-400 font-medium -mt-0.5">{label}</span>}
+        <span className="text-xl font-bold text-slate-800 font-mono">{clamped}%</span>
+        {label && <span className="text-[10px] text-slate-500 font-medium -mt-0.5">{label}</span>}
       </div>
     </div>
   );

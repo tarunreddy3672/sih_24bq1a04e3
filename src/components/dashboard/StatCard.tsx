@@ -22,50 +22,45 @@ export default function StatCard({
   subtitle,
   icon: Icon,
   trend,
-  accentColor = 'cyan',
+  accentColor = 'indigo',
 }: StatCardProps) {
   const colorMap = {
     cyan: {
-      bg: 'bg-cyan-500/10',
-      text: 'text-cyan-400',
-      border: 'border-cyan-500/20',
-      glow: 'shadow-cyan-500/10',
+      bg: 'bg-sky-50',
+      text: 'text-sky-600',
+      border: 'border-sky-200',
     },
     emerald: {
-      bg: 'bg-emerald-500/10',
-      text: 'text-emerald-400',
-      border: 'border-emerald-500/20',
-      glow: 'shadow-emerald-500/10',
+      bg: 'bg-emerald-50',
+      text: 'text-emerald-600',
+      border: 'border-emerald-200',
     },
     amber: {
-      bg: 'bg-amber-500/10',
-      text: 'text-amber-400',
-      border: 'border-amber-500/20',
-      glow: 'shadow-amber-500/10',
+      bg: 'bg-amber-50',
+      text: 'text-amber-600',
+      border: 'border-amber-200',
     },
     indigo: {
-      bg: 'bg-indigo-500/10',
-      text: 'text-indigo-400',
-      border: 'border-indigo-500/20',
-      glow: 'shadow-indigo-500/10',
+      bg: 'bg-indigo-50',
+      text: 'text-indigo-600',
+      border: 'border-indigo-200',
     },
     purple: {
-      bg: 'bg-purple-500/10',
-      text: 'text-purple-400',
-      border: 'border-purple-500/20',
-      glow: 'shadow-purple-500/10',
+      bg: 'bg-purple-50',
+      text: 'text-purple-600',
+      border: 'border-purple-200',
     },
   };
 
-  const style = colorMap[accentColor];
+  const style = colorMap[accentColor] || colorMap.indigo;
 
   return (
     <motion.div
-      whileHover={{ y: -3, transition: { duration: 0.2 } }}
-      className={`glass-panel rounded-2xl p-5 border border-white/10 hover:border-slate-700/80 transition-all ${style.glow}`}
+      whileHover={{ y: -2, transition: { duration: 0.15 } }}
+      className="study-card p-5 study-card-hover"
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
           {title}
         </span>
         <div className={`w-9 h-9 rounded-xl ${style.bg} ${style.border} border flex items-center justify-center`}>
@@ -74,15 +69,15 @@ export default function StatCard({
       </div>
 
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">
+        <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
           {value}
         </span>
         {trend && (
           <span
-            className={`text-xs font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-0.5 ${
+            className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
               trend.isPositive
-                ? 'bg-emerald-500/10 text-emerald-400'
-                : 'bg-red-500/10 text-red-400'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-rose-50 text-rose-700 border border-rose-200'
             }`}
           >
             {trend.isPositive ? '↑' : '↓'} {trend.value}
@@ -90,7 +85,7 @@ export default function StatCard({
         )}
       </div>
 
-      {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
     </motion.div>
   );
 }

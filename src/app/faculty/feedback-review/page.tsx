@@ -8,8 +8,8 @@ import {
   ShieldCheck,
   TrendingUp,
   Award,
-  Sparkles,
   Lock,
+  Lightbulb,
 } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
@@ -73,36 +73,36 @@ export default function FacultyFeedbackReviewPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#070B14] text-slate-100">
+    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
       <Sidebar role="faculty" />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Student Sentiment & Feedback Analytics" roleBadge="FACULTY" />
+        <Topbar title="Student Sentiment & Feedback" roleBadge="FACULTY" />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 live-indicator" />
-                <span className="text-xs font-mono uppercase tracking-wider text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 live-indicator" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                   Anonymized Student Feedback Telemetry
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                Pedagogical Sentiment Intelligence
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Course Sentiment & Feedback
               </h1>
             </div>
 
             <Badge variant="emerald" size="md" dot>
-              Privacy Shield Active (Student IDs Decoupled)
+              Privacy Shield Active (Student IDs Scrubbed)
             </Badge>
           </div>
 
           {/* Metric cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              title="Average Satisfaction"
+              title="Average Rating"
               value={`${feedbackData.averageRating} / 5.0`}
               subtitle="Top 3% faculty rating across campus"
               icon={Star}
@@ -110,23 +110,23 @@ export default function FacultyFeedbackReviewPage() {
               accentColor="amber"
             />
             <StatCard
-              title="Total Student Reviews"
+              title="Total Reviews"
               value={feedbackData.totalFeedback}
               subtitle="Section CSE-A Semester 4"
               icon={MessageSquare}
               accentColor="cyan"
             />
             <StatCard
-              title="Positive Sentiment Rate"
+              title="Satisfaction Rate"
               value="95.2%"
               subtitle="4-Star and 5-Star ratings"
               icon={TrendingUp}
               accentColor="emerald"
             />
             <StatCard
-              title="Pedagogical Index"
-              value="Exemplary"
-              subtitle="VLSI & Digital Logic Domain"
+              title="Subject Domain"
+              value="VLSI Circuits"
+              subtitle="Department of Computer Science"
               icon={Award}
               accentColor="indigo"
             />
@@ -135,19 +135,21 @@ export default function FacultyFeedbackReviewPage() {
           {/* Rating Distribution & AI Sentiment Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Distribution chart */}
-            <div className="lg:col-span-6 glass-panel rounded-2xl p-6 border border-white/10">
-              <h3 className="text-sm font-bold text-white mb-4">Rating Star Breakdown</h3>
+            <div className="lg:col-span-6 study-card p-6">
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Rating Star Breakdown</h3>
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={feedbackData.breakdown} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <XAxis dataKey="rating" stroke="#64748B" fontSize={11} tickFormatter={(val) => `${val} ★`} />
-                    <YAxis stroke="#64748B" fontSize={11} />
+                    <XAxis dataKey="rating" stroke="#94A3B8" fontSize={11} tickFormatter={(val) => `${val} ★`} />
+                    <YAxis stroke="#94A3B8" fontSize={11} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0F172A',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: '#FFFFFF',
+                        borderColor: '#E2E8F0',
                         borderRadius: '12px',
                         fontSize: '12px',
+                        color: '#0F172A',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                       }}
                     />
                     <Bar dataKey="count" fill="#F59E0B" radius={[6, 6, 0, 0]} name="Student Count" />
@@ -157,33 +159,33 @@ export default function FacultyFeedbackReviewPage() {
             </div>
 
             {/* AI Sentiment Analysis Card */}
-            <div className="lg:col-span-6 glass-panel rounded-2xl p-6 border border-white/10 flex flex-col justify-between">
+            <div className="lg:col-span-6 study-card p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
+                    <Lightbulb className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold text-white">AI Qualitative Sentiment Analysis</h3>
+                  <h3 className="text-sm font-bold text-slate-900">Qualitative Sentiment Summary</h3>
                 </div>
 
-                <div className="space-y-3 text-xs text-slate-300">
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                    <p className="font-semibold text-cyan-300 mb-1">Key Strengths Noted by Students:</p>
+                <div className="space-y-3 text-xs text-slate-700">
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <p className="font-semibold text-indigo-900 mb-1">Key Strengths Noted by Students:</p>
                     <p>• High clarity on physical semiconductor derivations (MOSFET inversion layers).</p>
-                    <p>• Interactive pacing and visual circuit simulations are highly rated.</p>
+                    <p>• Interactive pacing and visual circuit simulations are highly appreciated.</p>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                    <p className="font-semibold text-amber-300 mb-1">Student Suggestions / Action Items:</p>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <p className="font-semibold text-amber-900 mb-1">Student Suggestions / Action Items:</p>
                     <p>• Provide 5 minutes for open doubt resolution at the end of Friday sessions.</p>
-                    <p>• Share annotated digital blackboard sketches as PDF resources.</p>
+                    <p>• Share annotated digital blackboard sketches as downloadable notes.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-500">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                 <span className="flex items-center gap-1">
-                  <Lock className="w-3.5 h-3.5 text-emerald-400" /> Student identities scrubbed
+                  <Lock className="w-3.5 h-3.5 text-emerald-600" /> Student identities scrubbed
                 </span>
                 <span>Updated in real time</span>
               </div>
@@ -191,11 +193,11 @@ export default function FacultyFeedbackReviewPage() {
           </div>
 
           {/* Anonymized Qualitative Feedback Comments */}
-          <div className="glass-panel rounded-2xl p-6 border border-white/10 space-y-4">
-            <h3 className="text-base font-bold text-white">Recent Anonymized Student Comments</h3>
+          <div className="study-card p-6 space-y-4">
+            <h3 className="text-base font-bold text-slate-900">Recent Student Feedback</h3>
             <div className="space-y-3">
               {feedbackData.recentComments.map((commentItem, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-slate-950/60 border border-white/5 space-y-2">
+                <div key={idx} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       {[...Array(commentItem.rating)].map((_, starI) => (
@@ -206,7 +208,7 @@ export default function FacultyFeedbackReviewPage() {
                       Verified Student • Digital Electronics & VLSI
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 italic">"{commentItem.comment}"</p>
+                  <p className="text-xs text-slate-700 italic">"{commentItem.comment}"</p>
                 </div>
               ))}
             </div>

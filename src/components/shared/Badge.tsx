@@ -9,26 +9,26 @@ interface BadgeProps {
 
 export default function Badge({
   children,
-  variant = 'cyan',
+  variant = 'indigo',
   size = 'sm',
   dot = false,
 }: BadgeProps) {
   const variantStyles = {
-    cyan: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-    emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    amber: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    red: 'bg-red-500/10 text-red-400 border-red-500/30',
-    indigo: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
-    slate: 'bg-slate-800 text-slate-300 border-slate-700',
+    cyan: 'bg-sky-50 text-sky-700 border-sky-200',
+    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    amber: 'bg-amber-50 text-amber-700 border-amber-200',
+    red: 'bg-rose-50 text-rose-700 border-rose-200',
+    indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    slate: 'bg-slate-100 text-slate-700 border-slate-200',
   };
 
   const dotColors = {
-    cyan: 'bg-cyan-400',
-    emerald: 'bg-emerald-400',
-    amber: 'bg-amber-400',
-    red: 'bg-red-400',
-    indigo: 'bg-indigo-400',
-    slate: 'bg-slate-400',
+    cyan: 'bg-sky-500',
+    emerald: 'bg-emerald-500',
+    amber: 'bg-amber-500',
+    red: 'bg-rose-500',
+    indigo: 'bg-indigo-500',
+    slate: 'bg-slate-500',
   };
 
   const sizeStyles = {

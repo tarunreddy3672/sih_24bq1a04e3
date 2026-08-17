@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
   CalendarCheck,
-  TrendingUp,
   Award,
   AlertTriangle,
   BookOpen,
   ArrowRight,
-  Sparkles,
+  GraduationCap,
 } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
@@ -24,9 +23,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 
 export default function FacultyClassesPage() {
@@ -70,22 +66,22 @@ export default function FacultyClassesPage() {
   ];
 
   const columns = [
-    { header: 'Student Name', accessorKey: 'name' as const, className: 'font-semibold text-white' },
-    { header: 'Email ID', accessorKey: 'email' as const, className: 'font-mono text-xs text-slate-400' },
+    { header: 'Student Name', accessorKey: 'name' as const, className: 'font-semibold text-slate-900' },
+    { header: 'Email ID', accessorKey: 'email' as const, className: 'font-mono text-xs text-slate-500' },
     {
       header: 'Attendance %',
       cell: (row: any) => (
-        <span className={`font-mono font-bold ${row.attendancePct >= 85 ? 'text-emerald-400' : 'text-amber-400'}`}>
+        <span className={`font-mono font-bold ${row.attendancePct >= 85 ? 'text-emerald-700' : 'text-amber-700'}`}>
           {row.attendancePct}%
         </span>
       ),
     },
     {
       header: 'Avg. Score',
-      cell: (row: any) => <span className="font-mono text-cyan-400 font-bold">{row.avgQuizScore}%</span>,
+      cell: (row: any) => <span className="font-mono text-indigo-600 font-bold">{row.avgQuizScore}%</span>,
     },
     {
-      header: 'Identified Weak Topic',
+      header: 'Identified Weak Concept',
       cell: (row: any) => (
         <Badge variant="amber" size="sm">
           {row.weakTopic}
@@ -95,7 +91,7 @@ export default function FacultyClassesPage() {
     {
       header: 'Standing',
       cell: (row: any) => (
-        <Badge variant={row.status === 'Top Performer' ? 'cyan' : row.status === 'Consistent' ? 'emerald' : 'red'} size="sm">
+        <Badge variant={row.status === 'Top Performer' ? 'indigo' : row.status === 'Consistent' ? 'emerald' : 'red'} size="sm">
           {row.status}
         </Badge>
       ),
@@ -103,20 +99,20 @@ export default function FacultyClassesPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#070B14] text-slate-100">
+    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
       <Sidebar role="faculty" />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Class Roster & Pedagogical Telemetry" roleBadge="FACULTY" />
+        <Topbar title="Class Roster & Cohort Analytics" roleBadge="FACULTY" />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                 Class Performance & Cohort Analytics
               </h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Real-time correlation between attendance rates and diagnostic quiz outcomes.
               </p>
             </div>
@@ -125,7 +121,7 @@ export default function FacultyClassesPage() {
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-200 rounded-xl px-3 py-2 outline-none"
+                className="bg-white border border-slate-300 text-xs font-semibold text-slate-800 rounded-xl px-3 py-2 outline-none shadow-2xs"
               >
                 <option value="CSE-A">Cohort CSE-A (Digital Electronics)</option>
                 <option value="CSE-B">Cohort CSE-B (Data Structures)</option>
@@ -158,7 +154,7 @@ export default function FacultyClassesPage() {
               accentColor="cyan"
             />
             <StatCard
-              title="Flagged for Remediation"
+              title="Flagged for Review"
               value="3 Students"
               subtitle="Attendance < 80% or Quiz < 65%"
               icon={AlertTriangle}
@@ -168,28 +164,30 @@ export default function FacultyClassesPage() {
 
           {/* Weak Topic Cohort Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8 glass-panel rounded-2xl p-6 border border-white/10">
+            <div className="lg:col-span-8 study-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
                     Cohort Weak-Topic Distribution (Frequency of Missed Concepts)
                   </h3>
-                  <p className="text-xs text-slate-400">Identifies concepts requiring re-explanation in the next lecture session</p>
+                  <p className="text-xs text-slate-500">Identifies concepts requiring re-explanation in the next lecture session</p>
                 </div>
               </div>
 
               <div className="h-60 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weakTopicTrend} layout="vertical" margin={{ top: 10, right: 20, left: 60, bottom: 0 }}>
-                    <XAxis type="number" stroke="#64748B" fontSize={11} />
-                    <YAxis dataKey="topic" type="category" stroke="#94A3B8" fontSize={11} width={130} />
+                    <XAxis type="number" stroke="#94A3B8" fontSize={11} />
+                    <YAxis dataKey="topic" type="category" stroke="#475569" fontSize={11} width={130} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0F172A',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        backgroundColor: '#FFFFFF',
+                        borderColor: '#E2E8F0',
                         borderRadius: '12px',
                         fontSize: '12px',
+                        color: '#0F172A',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                       }}
                     />
                     <Bar dataKey="missCount" fill="#F59E0B" radius={[0, 6, 6, 0]} name="Students Missed" />
@@ -198,22 +196,22 @@ export default function FacultyClassesPage() {
               </div>
             </div>
 
-            {/* AI Remediation Action card */}
-            <div className="lg:col-span-4 glass-panel rounded-2xl p-6 border border-white/10 flex flex-col justify-between">
+            {/* AI Pedagogical Suggestion card */}
+            <div className="lg:col-span-4 study-card p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                    <GraduationCap className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold text-white">AI Pedagogical Suggestion</h3>
+                  <h3 className="text-sm font-bold text-slate-900">Pedagogical Suggestion</h3>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed mb-4">
-                  <strong className="text-amber-400">MOSFET Biasing</strong> was missed by 23% of CSE-A in the latest quiz.
+                <p className="text-xs text-slate-700 leading-relaxed mb-4">
+                  <strong className="text-amber-800">MOSFET Biasing</strong> was missed by 23% of Section CSE-A in the latest quiz.
                 </p>
 
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2 text-xs text-slate-400">
-                  <p className="font-semibold text-slate-200">Recommended Action:</p>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
+                  <p className="font-semibold text-slate-900">Recommended Action:</p>
                   <p>• Dedicate the first 10 minutes of Monday's session to small-signal numerical derivations.</p>
                   <p>• Push an automated 3-question follow-up micro quiz to student dashboards.</p>
                 </div>
@@ -221,7 +219,7 @@ export default function FacultyClassesPage() {
 
               <a
                 href="/faculty/quizzes/create"
-                className="mt-4 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20"
+                className="mt-4 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <span>Author Targeted Remediation Quiz</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -230,14 +228,14 @@ export default function FacultyClassesPage() {
           </div>
 
           {/* Student Roster Table */}
-          <div className="glass-panel rounded-2xl p-6 border border-white/10 space-y-4">
+          <div className="study-card p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Users className="w-4 h-4 text-cyan-400" />
-                Active Class Roster Telemetry
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Users className="w-4 h-4 text-indigo-600" />
+                Active Class Roster
               </h3>
-              <Badge variant="cyan" size="sm">
-                Live MongoDB Synchronized
+              <Badge variant="indigo" size="sm">
+                MongoDB Synchronized
               </Badge>
             </div>
 
