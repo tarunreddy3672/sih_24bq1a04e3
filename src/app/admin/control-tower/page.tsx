@@ -290,7 +290,7 @@ export default function AdminControlTowerPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {analytics.activeClasses.map((cls) => {
+              {analytics.activeClasses.map((cls: any) => {
                 const isUnderperforming = cls.attendancePercent < 85;
                 return (
                   <div
@@ -415,7 +415,7 @@ export default function AdminControlTowerPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {analytics.streakLeaderboard.map((student, idx) => (
+              {analytics.streakLeaderboard.map((student: any, idx: number) => (
                 <div
                   key={idx}
                   onClick={() => handleOpenStudentDrilldown(student.id)}

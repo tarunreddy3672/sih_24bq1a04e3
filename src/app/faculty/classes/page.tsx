@@ -341,7 +341,7 @@ export default function FacultyClassesPage() {
                       <YAxis stroke="#94A3B8" fontSize={11} domain={[0, 100]} unit="%" />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '12px' }}
-                        formatter={(val: any, name: string) => [`${val}${name === 'pct' ? '%' : ''}`, name === 'pct' ? 'Attendance %' : name]}
+                        formatter={(val: any, name: any) => [`${val}${name === 'pct' ? '%' : ''}`, name === 'pct' ? 'Attendance %' : String(name ?? '')]}
                       />
                       <Legend wrapperStyle={{ fontSize: '11px' }} />
                       <Line type="monotone" dataKey="pct"     stroke="#6366F1" strokeWidth={2.5} dot={{ r: 4, fill: '#6366F1' }} name="Attendance %" />

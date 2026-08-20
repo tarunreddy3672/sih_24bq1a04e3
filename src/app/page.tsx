@@ -5,32 +5,12 @@ import Link from 'next/link';
 import {
   motion, useScroll, useTransform, useSpring, useInView,
 } from 'framer-motion';
-import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
-import ArrowRight    from 'lucide-react/dist/esm/icons/arrow-right';
-import ShieldCheck   from 'lucide-react/dist/esm/icons/shield-check';
-import Camera        from 'lucide-react/dist/esm/icons/camera';
-import Lock          from 'lucide-react/dist/esm/icons/lock';
-import Sparkles      from 'lucide-react/dist/esm/icons/sparkles';
-import Zap           from 'lucide-react/dist/esm/icons/zap';
-import Star          from 'lucide-react/dist/esm/icons/star';
-import TrendingUp    from 'lucide-react/dist/esm/icons/trending-up';
-import Brain         from 'lucide-react/dist/esm/icons/brain';
-import Users         from 'lucide-react/dist/esm/icons/users';
-import Award         from 'lucide-react/dist/esm/icons/award';
-import ChevronRight  from 'lucide-react/dist/esm/icons/chevron-right';
-import Check         from 'lucide-react/dist/esm/icons/check';
-import Phone         from 'lucide-react/dist/esm/icons/phone';
-import Mail          from 'lucide-react/dist/esm/icons/mail';
-import MapPin        from 'lucide-react/dist/esm/icons/map-pin';
-import Globe         from 'lucide-react/dist/esm/icons/globe';
-import HelpCircle    from 'lucide-react/dist/esm/icons/help-circle';
-import Rocket        from 'lucide-react/dist/esm/icons/rocket';
-import Menu          from 'lucide-react/dist/esm/icons/menu';
-import X             from 'lucide-react/dist/esm/icons/x';
-import Share2        from 'lucide-react/dist/esm/icons/share-2';
-import Globe2        from 'lucide-react/dist/esm/icons/globe-2';
-import Send          from 'lucide-react/dist/esm/icons/send';
-import Rss           from 'lucide-react/dist/esm/icons/rss';
+import {
+  GraduationCap, ArrowRight, ShieldCheck, Camera, Lock, Sparkles,
+  Zap, Star, TrendingUp, Brain, Users, Award, ChevronRight, Check,
+  Phone, Mail, MapPin, Globe, HelpCircle, Rocket, Menu, X,
+  Share2, Earth, Send, Rss,
+} from 'lucide-react';
 import Hero3D from '@/components/landing/Hero3D';
 import FeaturesGrid from '@/components/landing/FeaturesGrid';
 
@@ -778,7 +758,7 @@ export default function LandingPage() {
                 Smart education intelligence for modern institutions.
               </p>
               <div className="flex items-center gap-3">
-                {[Share2, Globe2, Send, Rss, Mail].map((Icon, i) => (
+                {[Share2, Earth, Send, Rss, Mail].map((Icon, i) => (
                   <motion.a
                     key={i}
                     href="#"

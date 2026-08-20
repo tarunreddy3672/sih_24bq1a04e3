@@ -12,7 +12,7 @@ import { useLang } from '@/lib/i18n';
 
 interface Section {
   id: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   title: string;
   subtitle: string;

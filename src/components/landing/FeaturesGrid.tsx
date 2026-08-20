@@ -2,13 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import BookOpen      from 'lucide-react/dist/esm/icons/book-open';
-import Camera        from 'lucide-react/dist/esm/icons/camera';
-import ShieldCheck   from 'lucide-react/dist/esm/icons/shield-check';
-import Flame         from 'lucide-react/dist/esm/icons/flame';
-import HelpCircle    from 'lucide-react/dist/esm/icons/help-circle';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
+import {
+  BookOpen, Camera, ShieldCheck, Flame, HelpCircle, MessageSquare, GraduationCap,
+} from 'lucide-react';
 
 const features = [
   {

@@ -75,9 +75,9 @@ export default function RegisterPage() {
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim())                        return setError('Full name is required.');
-    if (password.length < 6)                 return setError('Password must be at least 6 characters.');
-    if (password !== confirmPassword)        return setError('Passwords do not match.');
+    if (!name.trim())                        { setError('Full name is required.'); return; }
+    if (password.length < 6)                 { setError('Password must be at least 6 characters.'); return; }
+    if (password !== confirmPassword)        { setError('Passwords do not match.'); return; }
 
     setLoading(true);
     try {
@@ -198,7 +198,7 @@ export default function RegisterPage() {
           {/* Step indicator */}
           <div className="flex items-center gap-2 mb-8">
             {['Details', 'Verify OTP'].map((label, i) => {
-              const done    = (i === 0 && (step === 'otp' || step === 'done'));
+              const done    = (i === 0 && ((step as Step) === 'otp' || (step as Step) === 'done'));
               const current = (i === 0 && step === 'details') || (i === 1 && step === 'otp');
               return (
                 <React.Fragment key={label}>
