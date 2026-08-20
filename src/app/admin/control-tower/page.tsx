@@ -11,6 +11,11 @@ import {
   Flame,
   ChevronRight,
   CheckCircle2,
+  AlertTriangle,
+  BookOpen,
+  Pencil,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
@@ -29,48 +34,67 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+const ALL_SECTIONS = [
+  'CSE-A','CSE-B','CSE-C','ECE-A','ECE-B','ECE-C',
+  'IT-A','IT-B','IT-C','AI-A','AI-B','AI-C',
+  'MECH-A','MECH-B','MECH-C','CIVIL-A','CIVIL-B','CIVIL-C',
+];
+
 export default function AdminControlTowerPage() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isDrilldownOpen, setIsDrilldownOpen] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(false);
+  const [manualSessions, setManualSessions] = useState<any[]>([]);
+  const [atRiskStudents, setAtRiskStudents] = useState<any[]>([]);
+  const [atRiskLoading, setAtRiskLoading] = useState(true);
 
-  const [analytics, setAnalytics] = useState({
-    totalStudents: 480,
-    totalFaculty: 32,
-    averageAttendance: 91.4,
-    averageQuizScore: 84.2,
-    activeClassesCount: 6,
-    activeClasses: [
-      { id: '1', class: 'CSE-A', subject: 'Digital Electronics & VLSI', faculty: 'Dr. Priya Nair', present: 56, absent: 4, total: 60, attendancePercent: 93, status: 'Active' as const },
-      { id: '2', class: 'CSE-B', subject: 'Data Structures & Algorithms', faculty: 'Prof. Rajesh Gupta', present: 48, absent: 12, total: 60, attendancePercent: 80, status: 'Active' as const },
-      { id: '3', class: 'ECE-A', subject: 'Signals & Systems', faculty: 'Dr. Ananya Sen', present: 52, absent: 6, total: 58, attendancePercent: 89, status: 'Active' as const },
-      { id: '4', class: 'IT-A', subject: 'Database Management Systems', faculty: 'Prof. Vikram Rao', present: 58, absent: 2, total: 60, attendancePercent: 96, status: 'Active' as const },
-      { id: '5', class: 'AI-A', subject: 'Deep Learning & Neural Nets', faculty: 'Dr. Meera Iyer', present: 44, absent: 6, total: 50, attendancePercent: 88, status: 'Upcoming' as const },
-      { id: '6', class: 'CSE-C', subject: 'Computer Networks', faculty: 'Prof. S. Verma', present: 55, absent: 5, total: 60, attendancePercent: 91, status: 'Completed' as const },
-    ],
-    attendanceTrends: [
-      { date: 'Mon', attendance: 92 },
-      { date: 'Tue', attendance: 94 },
-      { date: 'Wed', attendance: 88 },
-      { date: 'Thu', attendance: 91 },
-      { date: 'Fri', attendance: 95 },
-      { date: 'Sat', attendance: 89 },
-      { date: 'Today', attendance: 91.4 },
-    ],
-    quizPerformance: [
-      { subject: 'Digital Elec.', averageScore: 86, attemptsCount: 142 },
-      { subject: 'DSA', averageScore: 78, attemptsCount: 198 },
-      { subject: 'Signals', averageScore: 82, attemptsCount: 110 },
-      { subject: 'DBMS', averageScore: 89, attemptsCount: 165 },
-      { subject: 'Networks', averageScore: 81, attemptsCount: 130 },
-    ],
-    streakLeaderboard: [
-      { id: '64f1a2b3c4d5e6f7a8b9c001', name: 'Aarav Sharma', streak: 14, badges: ['14-Day Consistency Master', 'VLSI Quiz Champion'], classOrSubject: 'CSE-A' },
-      { id: '64f1a2b3c4d5e6f7a8b9c002', name: 'Diya Patel', streak: 9, badges: ['7-Day Spark', 'DSA Prodigy'], classOrSubject: 'CSE-A' },
-      { id: '64f1a2b3c4d5e6f7a8b9c003', name: 'Aditya Mehta', streak: 8, badges: ['7-Day Spark'], classOrSubject: 'IT-A' },
-      { id: '64f1a2b3c4d5e6f7a8b9c007', name: 'Sanya Kapoor', streak: 7, badges: ['7-Day Spark'], classOrSubject: 'ECE-A' },
-      { id: '64f1a2b3c4d5e6f7a8b9c008', name: 'Rohan Verma', streak: 5, badges: ['Weekly Warrior'], classOrSubject: 'CSE-B' },
-    ],
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjectForm, setSubjectForm] = useState({ section: 'CSE-A', subject: '' });
+  const [subjectSaving, setSubjectSaving] = useState(false);
+  const [subjectMsg, setSubjectMsg] = useState('');
+
+  const loadSubjects = async () => {
+    try {
+      const res = await fetch('/api/subject-assignments');
+      const data = await res.json();
+      if (data.assignments) setSubjects(data.assignments);
+    } catch { /* keep */ }
+  };
+
+  const handleSaveSubject = async () => {
+    if (!subjectForm.subject.trim()) return;
+    setSubjectSaving(true); setSubjectMsg('');
+    try {
+      const res = await fetch('/api/subject-assignments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subjectForm),
+      });
+      const data = await res.json();
+      if (data.success) { setSubjectMsg('Saved!'); loadSubjects(); }
+      else setSubjectMsg(data.error || 'Failed');
+    } catch { setSubjectMsg('Network error'); }
+    finally { setSubjectSaving(false); setTimeout(() => setSubjectMsg(''), 3000); }
+  };
+
+  const handleDeleteSubject = async (section: string) => {
+    await fetch('/api/subject-assignments', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section }),
+    });
+    loadSubjects();
+  };
+
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analytics, setAnalytics] = useState<any>({
+    totalStudents: 0,
+    totalFaculty: 0,
+    averageAttendance: 0,
+    averageQuizScore: 0,
+    activeClassesCount: 0,
+    activeClasses: [],
+    attendanceTrends: [],
+    quizPerformance: [],
+    streakLeaderboard: [],
   });
 
   useEffect(() => {
@@ -78,14 +102,36 @@ export default function AdminControlTowerPage() {
       try {
         const res = await fetch('/api/institution-analytics');
         const data = await res.json();
-        if (data.analytics) {
-          setAnalytics(data.analytics);
-        }
-      } catch (err) {
-        console.warn('Using local telemetry state');
-      }
+        if (data.analytics) setAnalytics(data.analytics);
+      } catch { console.warn('Using local telemetry state'); }
+      finally { setAnalyticsLoading(false); }
+    }
+    async function loadAtRisk() {
+      setAtRiskLoading(true);
+      try {
+        // Fetch all sections in parallel
+        const ALL_SECTIONS = [
+          'CSE-A','CSE-B','CSE-C','ECE-A','ECE-B','ECE-C',
+          'IT-A','IT-B','IT-C','AI-A','AI-B','AI-C',
+          'MECH-A','MECH-B','MECH-C','CIVIL-A','CIVIL-B','CIVIL-C',
+        ];
+        const results = await Promise.all(
+          ALL_SECTIONS.map(s =>
+            fetch(`/api/at-risk?class=${s}`).then(r => r.json()).catch(() => ({ students: [] }))
+          )
+        );
+        const all = results.flatMap(r => r.students || []);
+        // Sort: High first, then Medium, then Low
+        const order: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
+        all.sort((a, b) => (order[a.riskTier] ?? 3) - (order[b.riskTier] ?? 3));
+        if (all.length) setAtRiskStudents(all);
+      } catch { /* keep empty */ }
+      finally { setAtRiskLoading(false); }
     }
     loadAnalytics();
+    loadAtRisk();
+    loadSubjects();
+    fetch('/api/manual-attendance?summary=1').then(r => r.json()).then(d => setManualSessions(d.sessions || [])).catch(() => {});
   }, []);
 
   const handleOpenStudentDrilldown = (studentId: string) => {
@@ -99,7 +145,7 @@ export default function AdminControlTowerPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
+    <div className="flex min-h-screen dash-bg text-slate-900">
       <Sidebar role="admin" />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -112,7 +158,7 @@ export default function AdminControlTowerPage() {
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 live-indicator" />
                 <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                  Campus-Wide Academic Telemetry • SIH 2026 Edition
+                  SIH 2026 Edition
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -122,7 +168,7 @@ export default function AdminControlTowerPage() {
 
             <div className="flex items-center gap-2">
               <Badge variant="amber" size="md" dot>
-                {analytics.activeClassesCount} Active Class Sessions
+                {analyticsLoading ? '…' : analytics.activeClassesCount} Active Class Sessions
               </Badge>
             </div>
           </div>
@@ -143,11 +189,60 @@ export default function AdminControlTowerPage() {
             onTriggerAction={handleExecuteDirective}
           />
 
+          {/* AT-RISK PANEL */}
+          {atRiskLoading ? (
+            <div className="study-card p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <span className="text-sm font-bold text-slate-700">Loading at-risk data across all sections…</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-20 rounded-xl bg-slate-100 animate-pulse" />
+                ))}
+              </div>
+            </div>
+          ) : atRiskStudents.filter(s => s.riskTier !== 'Low').length > 0 && (
+            <div className="study-card p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-500" />
+                  At-Risk Student Radar
+                  <span className="text-xs font-normal text-slate-500 ml-1">— All Sections</span>
+                </h3>
+                <span className="text-xs text-slate-500">Faculty Console shows full detail · Not visible to students</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {atRiskStudents.filter(s => s.riskTier !== 'Low').map((s, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleOpenStudentDrilldown(s.studentId)}
+                    className={`p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md ${
+                      s.riskTier === 'High'
+                        ? 'bg-rose-50 border-rose-200 hover:border-rose-400'
+                        : 'bg-amber-50 border-amber-200 hover:border-amber-400'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-900">{s.name}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        s.riskTier === 'High' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                      }`}>{s.riskTier} Risk</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-semibold mb-0.5">{s.classOrSubject || ''}</p>
+                    <p className="text-[11px] text-slate-600 font-mono mb-1">Attendance: {s.attendancePct}%</p>
+                    <p className="text-[10px] text-slate-500 leading-relaxed">{s.riskReasons?.[0]}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 2. Key Institution Metrics Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               title="Total Enrolled Students"
-              value={analytics.totalStudents}
+              value={analyticsLoading ? '—' : analytics.totalStudents}
               subtitle="4 Academic Engineering Branches"
               icon={Users}
               trend={{ value: '100% Enrolled', isPositive: true }}
@@ -155,7 +250,7 @@ export default function AdminControlTowerPage() {
             />
             <StatCard
               title="Campus Attendance"
-              value={`${analytics.averageAttendance}%`}
+              value={analyticsLoading ? '—' : `${analytics.averageAttendance}%`}
               subtitle="+1.8% vs previous period"
               icon={CalendarCheck}
               trend={{ value: '1.8%', isPositive: true }}
@@ -163,16 +258,16 @@ export default function AdminControlTowerPage() {
             />
             <StatCard
               title="Average Quiz Score"
-              value={`${analytics.averageQuizScore}%`}
-              subtitle="Aggregated across 845 assessments"
+              value={analyticsLoading ? '—' : `${analytics.averageQuizScore}%`}
+              subtitle="Aggregated across all assessments"
               icon={Award}
               trend={{ value: '3.2%', isPositive: true }}
               accentColor="cyan"
             />
             <StatCard
               title="Faculty On-Duty"
-              value={analytics.totalFaculty}
-              subtitle="6 Active Lecture Theatres"
+              value={analyticsLoading ? '—' : analytics.totalFaculty}
+              subtitle="Active Lecture Theatres"
               icon={Activity}
               accentColor="amber"
             />
@@ -200,15 +295,13 @@ export default function AdminControlTowerPage() {
                 return (
                   <div
                     key={cls.id}
-                    className={`study-card p-5 study-card-hover transition-all ${
-                      isUnderperforming
-                        ? 'border-amber-300 bg-amber-50/30'
-                        : 'border-slate-200 bg-white'
+                    className={`study-card study-card-hover p-5 transition-all ${
+                      isUnderperforming ? 'border-amber-300' : ''
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">
                           {cls.class}
                         </span>
                         <h4 className="text-sm font-bold text-slate-900 leading-tight">{cls.subject}</h4>
@@ -223,7 +316,6 @@ export default function AdminControlTowerPage() {
                       </Badge>
                     </div>
 
-                    {/* Attendance Bar */}
                     <div className="my-3 space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-mono">
                         <span className="text-slate-600">
@@ -255,7 +347,6 @@ export default function AdminControlTowerPage() {
 
           {/* 4. Institutional Analytics: Attendance Trends & Quiz Performance */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Attendance Trend Chart */}
             <div className="lg:col-span-6 study-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -271,30 +362,20 @@ export default function AdminControlTowerPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analytics.attendanceTrends} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorAdminAttLight" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#4F46E5" stopOpacity={0.0} />
+                      <linearGradient id="colorAdminAtt" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" stroke="#94A3B8" fontSize={11} />
                     <YAxis domain={[75, 100]} stroke="#94A3B8" fontSize={11} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#FFFFFF',
-                        borderColor: '#E2E8F0',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        color: '#0F172A',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                      }}
-                    />
-                    <Area type="monotone" dataKey="attendance" stroke="#4F46E5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAdminAttLight)" />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '12px', color: '#0F172A', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+                    <Area type="monotone" dataKey="attendance" stroke="#4F46E5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAdminAtt)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Quiz Performance by Subject */}
             <div className="lg:col-span-6 study-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -302,7 +383,7 @@ export default function AdminControlTowerPage() {
                   <p className="text-xs text-slate-500">Average MCQ mastery rates</p>
                 </div>
                 <Badge variant="indigo" size="sm">
-                  Mean: 84.2%
+                  Mean: {analyticsLoading ? '…' : `${analytics.averageQuizScore}%`}
                 </Badge>
               </div>
 
@@ -311,16 +392,7 @@ export default function AdminControlTowerPage() {
                   <BarChart data={analytics.quizPerformance} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <XAxis dataKey="subject" stroke="#94A3B8" fontSize={10} />
                     <YAxis domain={[50, 100]} stroke="#94A3B8" fontSize={11} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#FFFFFF',
-                        borderColor: '#E2E8F0',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        color: '#0F172A',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                      }}
-                    />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '12px', color: '#0F172A', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
                     <Bar dataKey="averageScore" fill="#4F46E5" radius={[6, 6, 0, 0]} name="Avg Score %" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -328,7 +400,6 @@ export default function AdminControlTowerPage() {
             </div>
           </div>
 
-          {/* 5. Streak Leaderboard & Student Drill-Down Trigger */}
           <div className="study-card p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
@@ -337,13 +408,10 @@ export default function AdminControlTowerPage() {
                   Academic Consistency & Streak Leaders
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Click any student name to inspect authorized academic dossier and weak topics
+                  Click any student to inspect their academic dossier and weak topics
                 </p>
               </div>
-
-              <span className="text-xs text-indigo-700 font-semibold">
-                Top 5 High-Consistency Scholars
-              </span>
+              <span className="text-xs text-indigo-700 font-semibold">Top 5 High-Consistency Scholars</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -355,12 +423,12 @@ export default function AdminControlTowerPage() {
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="w-5 h-5 rounded-md bg-white border border-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-mono font-bold shadow-2xs">
+                      <span className="w-5 h-5 rounded-md bg-white border border-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-mono font-bold shadow-sm">
                         #{idx + 1}
                       </span>
                       <span className="text-[10px] font-semibold text-indigo-700">{student.classOrSubject}</span>
                     </div>
-                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">
                       {student.name}
                     </h4>
                     <p className="text-[11px] font-bold text-amber-700 flex items-center gap-1 mt-1 font-mono">
@@ -368,8 +436,7 @@ export default function AdminControlTowerPage() {
                       {student.streak} Days
                     </p>
                   </div>
-
-                  <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+                  <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
                     <span>Inspect Profile</span>
                     <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-slate-400" />
                   </div>
@@ -377,6 +444,134 @@ export default function AdminControlTowerPage() {
               ))}
             </div>
           </div>
+          {/* Subject Management */}
+          <div className="study-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-indigo-600" />
+                Subject Assignments
+              </h3>
+              <span className="text-xs text-slate-500">Assign subjects to sections — visible to faculty &amp; students</span>
+            </div>
+
+            {/* Add / Edit form */}
+            <div className="flex flex-wrap gap-3 items-end">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Section</label>
+                <select
+                  value={subjectForm.section}
+                  onChange={e => setSubjectForm(f => ({ ...f, section: e.target.value }))}
+                  className="bg-white border border-slate-300 text-xs rounded-xl px-3 py-2 outline-none"
+                >
+                  {ALL_SECTIONS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Subject Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Digital Electronics"
+                  value={subjectForm.subject}
+                  onChange={e => setSubjectForm(f => ({ ...f, subject: e.target.value }))}
+                  className="w-full bg-white border border-slate-300 focus:border-indigo-500 text-xs rounded-xl px-3 py-2 outline-none"
+                />
+              </div>
+              <button
+                onClick={handleSaveSubject}
+                disabled={subjectSaving || !subjectForm.subject.trim()}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />{subjectSaving ? 'Saving…' : 'Assign'}
+              </button>
+              {subjectMsg && <span className={`text-xs font-semibold ${subjectMsg === 'Saved!' ? 'text-emerald-700' : 'text-rose-700'}`}>{subjectMsg}</span>}
+            </div>
+
+            {/* Current assignments table */}
+            {subjects.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      {['Section', 'Subject', 'Last Updated', ''].map(h => (
+                        <th key={h} className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {subjects.map((a: any) => (
+                      <tr key={a._id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-2.5 font-bold text-indigo-700">{a.section}</td>
+                        <td className="px-4 py-2.5 text-slate-800">{a.subject}</td>
+                        <td className="px-4 py-2.5 text-slate-400 tabular-nums">{new Date(a.updatedAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setSubjectForm({ section: a.section, subject: a.subject })}
+                              className="p-1.5 rounded-lg hover:bg-indigo-50 text-indigo-600"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSubject(a.section)}
+                              className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {subjects.length === 0 && (
+              <p className="text-xs text-slate-400">No subject assignments yet. Use the form above to assign subjects to sections.</p>
+            )}
+          </div>
+
+          {/* Manual Attendance Sessions */}
+          {manualSessions.length > 0 && (
+            <div className="study-card p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+                  Recent Manual Attendance Sessions
+                </h3>
+                <span className="text-xs text-slate-500">Last 7 days · Faculty-submitted</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      {['Section','Subject','Date','Present','Absent','Rate'].map(h => (
+                        <th key={h} className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {manualSessions.slice(0, 8).map((s: any, i: number) => {
+                      const pres = (s.records || []).filter((r: any) => r.status === 'present').length;
+                      const tot  = (s.records || []).length;
+                      const rate = tot ? Math.round((pres / tot) * 100) : 0;
+                      return (
+                        <tr key={i} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-2.5 font-semibold text-slate-900">{s.section}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{s.subject}</td>
+                          <td className="px-4 py-2.5 text-slate-500 tabular-nums">{new Date(s.date).toLocaleDateString()}</td>
+                          <td className="px-4 py-2.5 text-emerald-700 font-bold tabular-nums">{pres}</td>
+                          <td className="px-4 py-2.5 text-rose-700 font-bold tabular-nums">{tot - pres}</td>
+                          <td className="px-4 py-2.5">
+                            <span className={`font-bold tabular-nums ${rate >= 75 ? 'text-emerald-700' : 'text-rose-700'}`}>{rate}%</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 

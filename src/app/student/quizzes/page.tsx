@@ -10,8 +10,8 @@ import {
   XCircle,
   Award,
   ArrowRight,
-  HelpCircle,
 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
 import Badge from '@/components/shared/Badge';
@@ -46,6 +46,8 @@ interface QuizResult {
 }
 
 export default function StudentQuizzesPage() {
+  const { data: session } = useSession();
+  const studentSection = (session?.user as any)?.classOrSubject || '';
   const [quizzes, setQuizzes] = useState<QuizItem[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<QuizItem | null>(null);
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
@@ -60,7 +62,8 @@ export default function StudentQuizzesPage() {
   useEffect(() => {
     async function loadQuizzes() {
       try {
-        const res = await fetch('/api/quizzes');
+        const params = studentSection ? `?section=${encodeURIComponent(studentSection)}` : '';
+        const res = await fetch(`/api/quizzes${params}`);
         const data = await res.json();
         if (data.quizzes) {
           setQuizzes(data.quizzes);
@@ -72,7 +75,7 @@ export default function StudentQuizzesPage() {
       }
     }
     loadQuizzes();
-  }, []);
+  }, [studentSection]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -81,7 +84,6 @@ export default function StudentQuizzesPage() {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            handleSubmitQuiz();
             return 0;
           }
           return prev - 1;
@@ -90,6 +92,14 @@ export default function StudentQuizzesPage() {
     }
     return () => clearInterval(timer);
   }, [isQuizActive, timeLeft, quizResult]);
+
+  // Auto-submit when timer hits 0
+  useEffect(() => {
+    if (timeLeft === 0 && isQuizActive && !quizResult) {
+      handleSubmitQuiz();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
 
   const handleStartQuiz = (quiz: QuizItem) => {
     setSelectedQuiz(quiz);
@@ -187,7 +197,7 @@ export default function StudentQuizzesPage() {
             /* QUIZ SELECTION LIST */
             <div className="space-y-4">
               <h2 className="text-base font-bold text-slate-900 uppercase tracking-wider">
-                Available Assessments for Section CSE-A
+                Available Assessments for Section {studentSection || 'Your Class'}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {quizzes.map((quiz) => (

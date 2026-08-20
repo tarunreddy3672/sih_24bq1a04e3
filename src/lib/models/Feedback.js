@@ -6,9 +6,16 @@ const FeedbackSchema = new mongoose.Schema({
     ref: 'User',
     default: null,
   },
+  // The subject name (e.g. "Digital Electronics & VLSI")
   subjectOrFacultyId: {
     type: String,
     required: true,
+  },
+  // The actual faculty ObjectId this feedback targets
+  facultyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
   },
   rating: {
     type: Number,
@@ -32,5 +39,6 @@ const FeedbackSchema = new mongoose.Schema({
 });
 
 FeedbackSchema.index({ subjectOrFacultyId: 1, createdAt: -1 });
+FeedbackSchema.index({ facultyId: 1, createdAt: -1 });
 
 export default mongoose.models.Feedback || mongoose.model('Feedback', FeedbackSchema);

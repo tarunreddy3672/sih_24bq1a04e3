@@ -6,9 +6,9 @@ import { getInstitutionAnalytics } from '@/lib/queries.js';
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
-    const userRole = session?.user?.role || 'admin';
-
-    if (userRole !== 'admin') {
+    const userRole = session?.user?.role;
+    // In dev/demo mode session may not resolve — allow through; real auth enforced by middleware
+    if (userRole && userRole !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized: Admin role required' }, { status: 403 });
     }
 

@@ -5,10 +5,14 @@ import { submitFeedback, getAggregatedFeedback } from '@/lib/queries.js';
 
 export async function GET(request) {
   try {
+    const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
     const subjectOrFacultyId = searchParams.get('target');
+    // Faculty can fetch their own feedback by passing ?mine=1
+    const mine = searchParams.get('mine');
+    const facultyId = mine ? session?.user?.id : null;
 
-    const feedbackData = await getAggregatedFeedback(subjectOrFacultyId || undefined);
+    const feedbackData = await getAggregatedFeedback(subjectOrFacultyId || undefined, facultyId || undefined);
     return NextResponse.json({ feedback: feedbackData });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Failed to fetch feedback' }, { status: 500 });
@@ -19,20 +23,24 @@ export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await request.json();
-    const { subjectOrFacultyId, rating, comment, anonymized } = body;
+    const { subjectOrFacultyId, facultyId, rating, comment, anonymized } = body;
 
     if (!subjectOrFacultyId || !rating || rating < 1 || rating > 5) {
       return NextResponse.json({ error: 'Valid subject/faculty and rating (1-5) are required' }, { status: 400 });
     }
 
-    const studentId = session?.user?.id || '64f1a2b3c4d5e6f7a8b9c001';
+    if (!session?.user?.id || session.user.role !== 'student') {
+      return NextResponse.json({ error: 'Only students can submit feedback' }, { status: 403 });
+    }
 
     const feedback = await submitFeedback({
-      studentId,
+      studentId: session.user.id,
       subjectOrFacultyId,
+      facultyId: facultyId || null,
       rating: Number(rating),
       comment: comment || '',
       anonymized: anonymized !== false,
+      section: session.user.classOrSubject,
     });
 
     return NextResponse.json({ success: true, feedback });

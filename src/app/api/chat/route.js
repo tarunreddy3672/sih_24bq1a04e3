@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/auth.js';
-import Anthropic from '@anthropic-ai/sdk';
+import { getStudent360 } from '@/lib/student360.js';
+import { geminiChat, geminiAvailable } from '@/lib/gemini.js';
 
 export async function POST(request) {
   try {
-    const session = await getServerSession(authOptions);
-    // Authenticate student or allow authenticated demo session
+    const session     = await getServerSession(authOptions);
+    const studentId   = session?.user?.id   || '64f1a2b3c4d5e6f7a8b9c001';
     const studentName = session?.user?.name || 'Aarav Sharma';
 
     const body = await request.json();
@@ -16,49 +17,84 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Messages array is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    // Fetch real student context
+    let ctx = null;
+    try { ctx = await getStudent360(studentId); } catch { /* use null */ }
+    const ai = ctx?.aiContext;
 
-    if (apiKey && apiKey.trim() !== '') {
+    const contextBlock = ai ? `
+Student context (verified data — do NOT invent or modify these numbers):
+- Attendance: ${ai.attendance.percentage}% (${ai.attendance.trend} trend)
+- Average quiz score: ${ai.academic.avgQuizScore}%
+- Weak topics: ${ai.academic.weakTopics.map((w) => w.topic).join(', ') || 'none identified yet'}
+- Recent scores: ${ai.academic.recentScores.map((s) => `${s.score}%`).join(', ') || 'none'}
+- Study streak: ${ai.streak.current} days
+- Risk level: ${ai.riskTier}${ai.riskFactors.length ? ' — ' + ai.riskFactors[0] : ''}
+- Active learning focus: ${ai.activePlan?.focusAreas?.join(', ') || currentTopic || 'General coursework'}
+- Preferred language: ${ai.language === 'te' ? 'Telugu' : ai.language === 'hi' ? 'Hindi' : 'English'}` : '';
+
+    const systemPrompt = `You are EduVision AI, a personalised academic mentor for engineering students.
+Student name: ${studentName}.${contextBlock}
+Rules:
+- Use ONLY the verified data above when referencing the student's performance.
+- Never invent marks, attendance percentages, or statistics.
+- If the student's language preference is Telugu or Hindi, respond in that language.
+- Provide rigorous yet intuitive explanations. Use markdown, bullet points, and equations where helpful.
+- When the student asks about a weak topic listed above, prioritise explaining that concept first.`;
+
+    const lastMessage = messages[messages.length - 1]?.content || '';
+
+    // ── 1. Try Gemini ──────────────────────────────────────────────────────────
+    if (geminiAvailable()) {
       try {
-        const anthropic = new Anthropic({ apiKey });
-        const systemPrompt = `You are EduVision AI, an academic tutor specializing in Engineering, Computer Science, Electronics, and Mathematics.
-Student name: ${studentName}.
-Current focus context: ${currentTopic || 'Digital Electronics & Data Structures'}.
-Provide clear, rigorous, yet intuitive explanations. Use markdown, bullet points, and equations where helpful. Encourage active problem-solving.`;
+        // Convert history to Gemini format — must start with 'user' and alternate roles
+        const rawHistory = messages.slice(0, -1).map((m) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        }));
+        const history = [];
+        let lastRole = '';
+        for (const turn of rawHistory) {
+          if (turn.role === lastRole) continue;
+          if (history.length === 0 && turn.role !== 'user') continue;
+          history.push(turn);
+          lastRole = turn.role;
+        }
 
-        // Format messages for Anthropic SDK
+        const reply = await geminiChat(systemPrompt, history, lastMessage);
+        return NextResponse.json({ reply, source: 'groq-llama-3.3-70b' });
+      } catch (groqErr) {
+        console.warn('[chat] Groq error, trying Anthropic fallback:', groqErr.message);
+      }
+    }
+
+    // ── 2. Try Anthropic fallback ──────────────────────────────────────────────
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (anthropicKey && anthropicKey.trim() !== '' && !anthropicKey.startsWith('<')) {
+      try {
+        const { default: Anthropic } = await import('@anthropic-ai/sdk');
+        const anthropic = new Anthropic({ apiKey: anthropicKey });
         const formattedMessages = messages.map((m) => ({
           role: m.role === 'assistant' ? 'assistant' : 'user',
           content: m.content,
         }));
-
         const response = await anthropic.messages.create({
-          model: 'claude-sonnet-5',
+          model: 'claude-sonnet-4-5',
           max_tokens: 1000,
           system: systemPrompt,
           messages: formattedMessages,
         });
-
         const reply = response.content[0]?.text || 'No response generated.';
-        return NextResponse.json({
-          reply,
-          source: 'claude-sonnet-5',
-        });
+        return NextResponse.json({ reply, source: 'claude-sonnet-4-5' });
       } catch (anthropicErr) {
-        return NextResponse.json({
-          error: `Anthropic Claude API Error: ${anthropicErr.message}. Ensure ANTHROPIC_API_KEY is active and supports 'claude-sonnet-5'.`,
-          reply: getTutorFallbackResponse(messages[messages.length - 1]?.content),
-        });
+        console.warn('[chat] Anthropic error:', anthropicErr.message);
       }
     }
 
-    // High fidelity offline academic tutor fallback for SIH demo without active API key
-    const latestUserMessage = messages[messages.length - 1]?.content || '';
-    const reply = getTutorFallbackResponse(latestUserMessage);
-
+    // ── 3. Offline fallback ────────────────────────────────────────────────────
     return NextResponse.json({
-      reply,
-      source: 'eduvision-academic-ai-engine',
+      reply: getTutorFallbackResponse(lastMessage),
+      source: 'eduvision-offline-engine',
     });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
@@ -67,18 +103,14 @@ Provide clear, rigorous, yet intuitive explanations. Use markdown, bullet points
 
 function getTutorFallbackResponse(query = '') {
   const q = query.toLowerCase();
-
   if (q.includes('mosfet') || q.includes('channel') || q.includes('transistor')) {
-    return `### MOSFET Channel & Operation Principles\n\nIn an **Enhancement MOSFET**, channel formation occurs as follows:\n\n1. **Cutoff Region ($V_{GS} < V_{th}$):** No conducting channel exists between Drain and Source. Current $I_D \\approx 0$.\n2. **Triode / Linear Region ($V_{GS} > V_{th}$ and $V_{DS} < V_{GS} - V_{th}$):** Gate electric field attracts minority carriers, creating an inversion layer. The channel acts as a voltage-controlled resistor:\n   $$I_D = \\mu_n C_{ox} \\frac{W}{L} \\left[(V_{GS} - V_{th})V_{DS} - \\frac{V_{DS}^2}{2}\\right]$$\n3. **Saturation Region ($V_{DS} \\ge V_{GS} - V_{th}$):** Channel pinches off at the drain end. Current becomes saturated:\n   $$I_D = \\frac{1}{2} \\mu_n C_{ox} \\frac{W}{L} (V_{GS} - V_{th})^2$$\n\n💡 **Key Takeaway:** For amplification, always bias in saturation; for digital switching, operate between cutoff and deep triode!`;
+    return `### MOSFET Channel & Operation Principles\n\nIn an **Enhancement MOSFET**, channel formation occurs as follows:\n\n1. **Cutoff Region ($V_{GS} < V_{th}$):** No conducting channel exists. Current $I_D \\approx 0$.\n2. **Triode Region ($V_{GS} > V_{th}$, $V_{DS} < V_{GS} - V_{th}$):**\n   $$I_D = \\mu_n C_{ox} \\frac{W}{L} \\left[(V_{GS} - V_{th})V_{DS} - \\frac{V_{DS}^2}{2}\\right]$$\n3. **Saturation Region ($V_{DS} \\ge V_{GS} - V_{th}$):**\n   $$I_D = \\frac{1}{2} \\mu_n C_{ox} \\frac{W}{L} (V_{GS} - V_{th})^2$$\n\n💡 Bias in saturation for amplification; triode for digital switching.`;
   }
-
-  if (q.includes('delay') || q.includes('cmos') || q.includes('timing') || q.includes('skew')) {
-    return `### CMOS Propagation Delay & Timing Analysis\n\nPropagation delay ($t_{pd}$) is governed by RC time constants during charging/discharging:\n\n- **Elmore Delay Model:** $t_{pd} \\approx \\ln(2) \\cdot R_{eq} \\cdot C_L \\approx 0.69 R_{eq} C_L$\n- **NAND vs NOR Performance:**\n  - In **NAND**, NMOS transistors (higher mobility $\\mu_n$) are in series.\n  - In **NOR**, PMOS transistors (lower mobility $\\mu_p \\approx \\mu_n / 2.5$) are in series.\n  - Therefore, **NAND gates are inherently faster and more compact** in silicon area.\n\n⚡ **Design Tip:** Minimize high fan-out nets and size transistors according to Logical Effort theory for critical path optimization.`;
+  if (q.includes('delay') || q.includes('cmos') || q.includes('timing')) {
+    return `### CMOS Propagation Delay\n\n- **Elmore Delay:** $t_{pd} \\approx 0.69 \\cdot R_{eq} \\cdot C_L$\n- NAND gates are faster than NOR because NMOS (higher $\\mu_n$) are in series in NAND vs PMOS in NOR.\n\n⚡ Use Logical Effort theory to size transistors on critical paths.`;
   }
-
-  if (q.includes('tree') || q.includes('dsa') || q.includes('graph') || q.includes('sort') || q.includes('array')) {
-    return `### Data Structures & Algorithmic Insights\n\nHere is a structured breakdown for your question:\n\n- **Red-Black Tree Balance Invariant:** Ensures height $h \\le 2 \\log_2(n + 1)$ with $O(\\log n)$ worst-case search, insertion, and deletion.\n- **Graph Traversal Complexity:**\n  - BFS / DFS: $O(V + E)$ using adjacency lists.\n  - Topological Sort: Valid only on Directed Acyclic Graphs (DAGs) using Kahn's algorithm or DFS finish times.\n- **Amortized Push:** Dynamic array doubling yields $O(1)$ amortized cost despite occasional $O(n)$ reallocations.\n\nWhich specific sub-concept or problem example would you like to solve next?`;
+  if (q.includes('tree') || q.includes('graph') || q.includes('sort') || q.includes('dsa')) {
+    return `### Data Structures Quick Reference\n\n- **Red-Black Tree:** $O(\\log n)$ search/insert/delete, height $\\le 2\\log_2(n+1)$\n- **BFS/DFS:** $O(V + E)$ with adjacency lists\n- **Dynamic Array amortized push:** $O(1)$\n\nWhich specific problem would you like to work through?`;
   }
-
-  return `### Academic Explanation\n\nGreat question! In technical coursework, mastering the core physical or mathematical principles is key.\n\n- **Core Concept:** Break the problem down into boundary conditions, state variables, and governing equations.\n- **Verification Step:** Always perform dimensional analysis or trace small inputs (e.g. $n=0, 1$) to verify your logic.\n- **Next Practice:** Try solving the corresponding quiz problem in your Portal to reinforce this concept into long-term memory!\n\nFeel free to ask a follow-up question or paste code/equations!`;
+  return `### Academic Explanation\n\nBreak the problem into boundary conditions, state variables, and governing equations. Always verify with dimensional analysis or small test cases.\n\nFeel free to ask a follow-up or paste code/equations!`;
 }

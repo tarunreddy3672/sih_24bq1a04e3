@@ -25,6 +25,8 @@ const QuizSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  branch:  { type: String, default: 'CSE' },
+  section: { type: String, default: '' },
   questions: [QuizQuestionSchema],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -37,6 +39,6 @@ const QuizSchema = new mongoose.Schema({
   },
 });
 
-QuizSchema.index({ subject: 1, createdAt: -1 });
+QuizSchema.index({ subject: 1, branch: 1, section: 1, createdAt: -1 });
 
 export default mongoose.models.Quiz || mongoose.model('Quiz', QuizSchema);

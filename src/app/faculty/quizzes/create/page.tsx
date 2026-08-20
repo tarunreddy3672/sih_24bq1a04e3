@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   PlusCircle,
@@ -21,8 +21,29 @@ interface QuizQuestionDraft {
   topic: string;
 }
 
+const BRANCHES = ['CSE', 'ECE', 'IT', 'AI', 'MECH', 'CIVIL'];
+const SECTIONS: Record<string, string[]> = {
+  CSE:   ['CSE-A',   'CSE-B',   'CSE-C'],
+  ECE:   ['ECE-A',   'ECE-B',   'ECE-C'],
+  IT:    ['IT-A',    'IT-B',    'IT-C'],
+  AI:    ['AI-A',    'AI-B',    'AI-C'],
+  MECH:  ['MECH-A',  'MECH-B',  'MECH-C'],
+  CIVIL: ['CIVIL-A', 'CIVIL-B', 'CIVIL-C'],
+};
+
 export default function FacultyQuizCreatePage() {
-  const [subject, setSubject] = useState('Digital Electronics');
+  const [subject, setSubject] = useState('');
+  const [branch,  setBranch]  = useState('CSE');
+  const [section, setSection] = useState('CSE-A');
+  const [enrolledCount, setEnrolledCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    setEnrolledCount(null);
+    fetch(`/api/students?section=${section}`)
+      .then(r => r.json())
+      .then(d => setEnrolledCount(d.students?.length ?? 0))
+      .catch(() => setEnrolledCount(null));
+  }, [section]);
   const [questions, setQuestions] = useState<QuizQuestionDraft[]>([
     {
       question: 'What is the effect of scaling down gate oxide thickness (Tox) in deep-submicron MOSFETs?',
@@ -116,6 +137,8 @@ export default function FacultyQuizCreatePage() {
         body: JSON.stringify({
           action: 'create',
           subject,
+          branch,
+          section,
           questions,
         }),
       });
@@ -198,31 +221,39 @@ export default function FacultyQuizCreatePage() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Academic Subject
-                </label>
-                <select
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-slate-800 outline-none"
-                >
-                  <option value="Digital Electronics">Digital Electronics & VLSI</option>
-                  <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
-                  <option value="Signals & Systems">Signals & Systems</option>
-                  <option value="Database Management Systems">Database Management Systems</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Target Student Cohort
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Academic Subject</label>
                 <input
                   type="text"
-                  disabled
-                  value="Section CSE-A (Enrolled: 60 Students)"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-500 outline-none font-mono"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="e.g. Data Structures & Algorithms"
+                  className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Branch</label>
+                <select value={branch} onChange={e => {
+                  const b = e.target.value;
+                  const s = SECTIONS[b]?.[0] || '';
+                  setBranch(b);
+                  setSection(s);
+                }}
+                  className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-slate-800 outline-none">
+                  {BRANCHES.map(b => <option key={b}>{b}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Target Section</label>
+                <select value={section} onChange={e => setSection(e.target.value)}
+                  className="w-full bg-white border border-slate-300 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-slate-800 outline-none">
+                  {(SECTIONS[branch] || []).map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Enrolled Students</label>
+                <div className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-600 font-mono">
+                  Section {section} — {enrolledCount === null ? 'Loading...' : `${enrolledCount} students enrolled`}
+                </div>
               </div>
             </div>
           </div>
@@ -293,7 +324,7 @@ export default function FacultyQuizCreatePage() {
                             value={opt}
                             onChange={(e) => handleOptionChange(qIdx, optIdx, e.target.value)}
                             placeholder={`Option ${String.fromCharCode(65 + optIdx)} text...`}
-                            className="flex-1 bg-transparent text-xs text-slate-900 outline-none"
+                            className="flex-1 min-w-0 bg-white border border-slate-300 focus:border-indigo-500 rounded-lg px-2 py-1 text-xs text-slate-900 placeholder-slate-400 outline-none"
                           />
                         </div>
                       );

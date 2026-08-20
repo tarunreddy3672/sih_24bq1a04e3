@@ -1,66 +1,37 @@
 import bcrypt from 'bcryptjs';
 
 export const DEMO_USERS = [
-  {
-    _id: '64f1a2b3c4d5e6f7a8b9c001',
-    name: 'Aarav Sharma',
-    email: 'student@eduvision.ai',
-    role: 'student',
-    classOrSubject: 'CSE-A',
-    password: 'password123',
-    faceEmbedding: [0.12, -0.45, 0.78, 0.33, -0.19, 0.62, 0.44, -0.08, 0.15, 0.29],
-  },
-  {
-    _id: '64f1a2b3c4d5e6f7a8b9c002',
-    name: 'Diya Patel',
-    email: 'diya@eduvision.ai',
-    role: 'student',
-    classOrSubject: 'CSE-A',
-    password: 'password123',
-    faceEmbedding: [0.22, -0.35, 0.68, 0.23, -0.29, 0.52, 0.34, -0.18, 0.25, 0.19],
-  },
-  {
-    _id: '64f1a2b3c4d5e6f7a8b9c003',
-    name: 'Rohan Verma',
-    email: 'rohan@eduvision.ai',
-    role: 'student',
-    classOrSubject: 'CSE-B',
-    password: 'password123',
-    faceEmbedding: [0.18, -0.40, 0.72, 0.30, -0.22, 0.58, 0.40, -0.12, 0.19, 0.24],
-  },
-  {
-    _id: '64f1a2b3c4d5e6f7a8b9c004',
-    name: 'Dr. Priya Nair',
-    email: 'faculty@eduvision.ai',
-    role: 'faculty',
-    classOrSubject: 'Digital Electronics & VLSI',
-    password: 'password123',
-    faceEmbedding: [],
-  },
-  {
-    _id: '64f1a2b3c4d5e6f7a8b9c005',
-    name: 'Prof. Rajesh Gupta',
-    email: 'rajesh@eduvision.ai',
-    role: 'faculty',
-    classOrSubject: 'Data Structures & Algorithms',
-    password: 'password123',
-    faceEmbedding: [],
-  },
-  {
-    _id: '64f1a2b3c4d5e6f7a8b9c006',
-    name: 'Director S. K. Roy',
-    email: 'admin@eduvision.ai',
-    role: 'admin',
-    classOrSubject: 'Dean Academic Operations',
-    password: 'password123',
-    faceEmbedding: [],
-  },
+  { _id: '64f1a2b3c4d5e6f7a8b9c001', name: 'Aarav Sharma',    email: 'student@eduvision.ai',  role: 'student', classOrSubject: 'CSE-A', password: 'password123', faceEmbedding: [0.12,-0.45,0.78,0.33,-0.19,0.62,0.44,-0.08,0.15,0.29] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c002', name: 'Diya Patel',      email: 'diya@eduvision.ai',     role: 'student', classOrSubject: 'CSE-A', password: 'password123', faceEmbedding: [0.22,-0.35,0.68,0.23,-0.29,0.52,0.34,-0.18,0.25,0.19] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c003', name: 'Rohan Verma',     email: 'rohan@eduvision.ai',    role: 'student', classOrSubject: 'CSE-B', password: 'password123', faceEmbedding: [0.18,-0.40,0.72,0.30,-0.22,0.58,0.40,-0.12,0.19,0.24] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c007', name: 'Sanya Kapoor',    email: 'sanya@eduvision.ai',    role: 'student', classOrSubject: 'ECE-A', password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c008', name: 'Arjun Mehta',     email: 'arjun@eduvision.ai',    role: 'student', classOrSubject: 'ECE-B', password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c009', name: 'Priya Singh',     email: 'priya.s@eduvision.ai',  role: 'student', classOrSubject: 'ECE-C', password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c010', name: 'Karan Joshi',     email: 'karan@eduvision.ai',    role: 'student', classOrSubject: 'IT-A',  password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c011', name: 'Neha Gupta',      email: 'neha@eduvision.ai',     role: 'student', classOrSubject: 'IT-B',  password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c012', name: 'Rahul Das',       email: 'rahul@eduvision.ai',    role: 'student', classOrSubject: 'IT-C',  password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c013', name: 'Ananya Iyer',     email: 'ananya@eduvision.ai',   role: 'student', classOrSubject: 'AI-A',  password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c014', name: 'Vikram Nair',     email: 'vikram@eduvision.ai',   role: 'student', classOrSubject: 'AI-B',  password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c015', name: 'Ishaan Roy',      email: 'ishaan@eduvision.ai',   role: 'student', classOrSubject: 'AI-C',  password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c016', name: 'Meera Pillai',    email: 'meera@eduvision.ai',    role: 'student', classOrSubject: 'MECH-A',password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c017', name: 'Suresh Kumar',    email: 'suresh@eduvision.ai',   role: 'student', classOrSubject: 'MECH-B',password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c018', name: 'Divya Reddy',     email: 'divya@eduvision.ai',    role: 'student', classOrSubject: 'MECH-C',password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c019', name: 'Aditya Sharma',   email: 'aditya@eduvision.ai',   role: 'student', classOrSubject: 'CIVIL-A',password:'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c020', name: 'Pooja Mishra',    email: 'pooja@eduvision.ai',    role: 'student', classOrSubject: 'CIVIL-B',password:'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c021', name: 'Ravi Shankar',    email: 'ravi@eduvision.ai',     role: 'student', classOrSubject: 'CIVIL-C',password:'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c022', name: 'Tanya Bose',      email: 'tanya@eduvision.ai',    role: 'student', classOrSubject: 'CSE-B', password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c023', name: 'Nikhil Rao',      email: 'nikhil@eduvision.ai',   role: 'student', classOrSubject: 'CSE-C', password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c004', name: 'Dr. Priya Nair',  email: 'faculty@eduvision.ai',  role: 'faculty', classOrSubject: 'Digital Electronics & VLSI',    password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c005', name: 'Prof. Rajesh Gupta', email: 'rajesh@eduvision.ai', role: 'faculty', classOrSubject: 'Data Structures & Algorithms', password: 'password123', faceEmbedding: [] },
+  { _id: '64f1a2b3c4d5e6f7a8b9c006', name: 'Director S. K. Roy', email: 'admin@eduvision.ai',  role: 'admin',   classOrSubject: 'Dean Academic Operations',       password: 'password123', faceEmbedding: [] },
 ];
 
 export const DEMO_QUIZZES = [
   {
     _id: '64f1a2b3c4d5e6f7a8b9c101',
     subject: 'Digital Electronics',
+    branch: 'CSE',
+    section: 'CSE-A',
     createdBy: '64f1a2b3c4d5e6f7a8b9c004',
     questions: [
       {
@@ -92,6 +63,8 @@ export const DEMO_QUIZZES = [
   {
     _id: '64f1a2b3c4d5e6f7a8b9c102',
     subject: 'Data Structures & Algorithms',
+    branch: 'CSE',
+    section: 'CSE-A',
     createdBy: '64f1a2b3c4d5e6f7a8b9c005',
     questions: [
       {

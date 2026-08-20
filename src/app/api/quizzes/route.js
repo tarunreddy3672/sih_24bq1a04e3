@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/auth.js';
-import { getQuizzes, getQuizById, createQuiz, submitQuizAttempt, getQuizAttemptsByStudent } from '@/lib/queries.js';
+import { getQuizzes, getQuizById, createQuiz, deleteQuiz, submitQuizAttempt, getQuizAttemptsByStudent } from '@/lib/queries.js';
+import { matchesStudentAudience } from '@/lib/contentTargeting.js';
 
 export async function GET(request) {
   try {
@@ -9,12 +10,16 @@ export async function GET(request) {
     const quizId = searchParams.get('id');
     const subject = searchParams.get('subject');
     const studentHistory = searchParams.get('history');
+    const mine = searchParams.get('mine');
 
     const session = await getServerSession(authOptions);
+    const role = session?.user?.role;
 
     if (studentHistory) {
-      const studentId = session?.user?.id || '64f1a2b3c4d5e6f7a8b9c001';
-      const history = await getQuizAttemptsByStudent(studentId);
+      if (!session?.user?.id) {
+        return NextResponse.json({ history: [] });
+      }
+      const history = await getQuizAttemptsByStudent(session.user.id);
       return NextResponse.json({ history });
     }
 
@@ -23,11 +28,31 @@ export async function GET(request) {
       if (!quiz) {
         return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
       }
+      if (role === 'student') {
+        const section = session?.user?.classOrSubject;
+        if (!matchesStudentAudience(quiz, section)) {
+          return NextResponse.json({ error: 'Quiz not available for your section' }, { status: 403 });
+        }
+      }
       return NextResponse.json({ quiz });
     }
 
-    const quizzes = await getQuizzes(subject || undefined);
-    return NextResponse.json({ quizzes });
+    if (role === 'student') {
+      const audienceSection = session?.user?.classOrSubject;
+      if (!audienceSection) {
+        return NextResponse.json({ quizzes: [] });
+      }
+      const quizzes = await getQuizzes({ subject: subject || undefined, audienceSection });
+      return NextResponse.json({ quizzes });
+    }
+
+    if (role === 'faculty' || role === 'admin') {
+      const createdBy = mine && role === 'faculty' ? session.user.id : undefined;
+      const quizzes = await getQuizzes({ subject: subject || undefined, createdBy });
+      return NextResponse.json({ quizzes });
+    }
+
+    return NextResponse.json({ quizzes: [] }, { status: 401 });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Failed to fetch quizzes' }, { status: 500 });
   }
@@ -39,57 +64,74 @@ export async function POST(request) {
     const body = await request.json();
     const { action } = body;
 
-    // 1. Submit Quiz Attempt
     if (action === 'submit') {
       const { quizId, selectedAnswers } = body;
       if (!quizId || !selectedAnswers || !Array.isArray(selectedAnswers)) {
         return NextResponse.json({ error: 'Invalid quiz submission parameters' }, { status: 400 });
       }
-
-      // Identify student from session or fallback demo
-      const studentId = session?.user?.id || '64f1a2b3c4d5e6f7a8b9c001';
-
-      // Server-side scoring & weak topic calculation
-      const result = await submitQuizAttempt({
-        quizId,
-        studentId,
-        selectedAnswers,
-      });
-
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      const quiz = await getQuizById(quizId, false);
+      if (!quiz) return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+      if (session.user.role === 'student' && !matchesStudentAudience(quiz, session.user.classOrSubject)) {
+        return NextResponse.json({ error: 'Quiz not available for your section' }, { status: 403 });
+      }
+      const result = await submitQuizAttempt({ quizId, studentId: session.user.id, selectedAnswers });
       return NextResponse.json({ success: true, result });
     }
 
-    // 2. Create Quiz (Faculty or Admin only)
     if (action === 'create') {
-      const userRole = session?.user?.role || 'faculty'; // Allow demo faculty fallback if unauthenticated demo
+      const userRole = session?.user?.role;
       if (userRole !== 'faculty' && userRole !== 'admin') {
         return NextResponse.json({ error: 'Unauthorized: Faculty or Admin role required' }, { status: 403 });
       }
-
-      const { subject, questions } = body;
+      const { subject, branch, section, questions } = body;
       if (!subject || !questions || !Array.isArray(questions) || questions.length === 0) {
         return NextResponse.json({ error: 'Subject and questions array are required' }, { status: 400 });
       }
-
-      // Validate question structure
+      if (!branch || !section) {
+        return NextResponse.json({ error: 'Branch and target section are required' }, { status: 400 });
+      }
       for (const q of questions) {
         if (!q.question || !Array.isArray(q.options) || q.options.length < 2 || q.correctAnswer === undefined || !q.topic) {
           return NextResponse.json({ error: 'Each question must have question text, options, correctAnswer index, and topic' }, { status: 400 });
         }
       }
-
-      const createdBy = session?.user?.id || '64f1a2b3c4d5e6f7a8b9c004';
-      const created = await createQuiz({
-        subject,
-        questions,
-        createdBy,
-      });
-
+      const createdBy = session?.user?.id;
+      if (!createdBy) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      const created = await createQuiz({ subject, branch, section, questions, createdBy });
       return NextResponse.json({ success: true, quiz: created });
     }
 
     return NextResponse.json({ error: 'Unknown action specified' }, { status: 400 });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const session = await getServerSession(authOptions);
+    const userRole = session?.user?.role;
+    if (userRole !== 'faculty' && userRole !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+    const { searchParams } = new URL(request.url);
+    const quizId = searchParams.get('id');
+    if (!quizId) return NextResponse.json({ error: 'Quiz ID required' }, { status: 400 });
+
+    const quiz = await getQuizById(quizId, false);
+    if (!quiz) return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+    if (userRole === 'faculty' && String(quiz.createdBy) !== String(session.user.id)) {
+      return NextResponse.json({ error: 'You can only delete quizzes you created' }, { status: 403 });
+    }
+
+    await deleteQuiz(quizId);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: error.message || 'Failed to delete quiz' }, { status: 500 });
   }
 }

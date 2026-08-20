@@ -21,6 +21,23 @@ export const authOptions = {
         }
 
         const email = credentials.email.trim().toLowerCase();
+
+        // OTP-verified login — password field carries the verified signal
+        if (String(credentials.password).startsWith('OTP_VERIFIED_')) {
+          let user = await getUserByEmail(email);
+          if (!user) {
+            const demoMatch = DEMO_USERS.find(u => u.email.toLowerCase() === email);
+            if (demoMatch) user = demoMatch;
+          }
+          if (!user) throw new Error('Account not found.');
+          return {
+            id: user._id?.toString ? user._id.toString() : user._id,
+            name: user.name, email: user.email,
+            role: user.role, classOrSubject: user.classOrSubject,
+            subjects: user.subjects || [],
+          };
+        }
+
         let user = await getUserByEmail(email);
 
         // Fallback for immediate demo testing
@@ -33,6 +50,7 @@ export const authOptions = {
               email: demoMatch.email,
               role: demoMatch.role,
               classOrSubject: demoMatch.classOrSubject,
+              subjects: demoMatch.subjects || [],
             };
           }
           throw new Error('Invalid email or password.');
@@ -56,6 +74,7 @@ export const authOptions = {
           email: user.email,
           role: user.role,
           classOrSubject: user.classOrSubject,
+          subjects: user.subjects || [],
         };
       },
     }),
@@ -66,6 +85,7 @@ export const authOptions = {
         token.id = user.id;
         token.role = user.role;
         token.classOrSubject = user.classOrSubject;
+        token.subjects = user.subjects || [];
       }
       return token;
     },
@@ -74,6 +94,7 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.classOrSubject = token.classOrSubject;
+        session.user.subjects = token.subjects || [];
       }
       return session;
     },

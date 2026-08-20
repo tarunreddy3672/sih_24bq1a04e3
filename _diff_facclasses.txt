@@ -1,0 +1,466 @@
+﻿diff --git a/src/app/faculty/classes/page.tsx b/src/app/faculty/classes/page.tsx
+index 8b09bb4..658d36b 100644
+--- a/src/app/faculty/classes/page.tsx
++++ b/src/app/faculty/classes/page.tsx
+@@ -1,103 +1,178 @@
+ 'use client';
+ 
+-import React, { useState } from 'react';
++import React, { useState, useEffect } from 'react';
+ import { motion } from 'framer-motion';
+ import {
+-  Users,
+-  CalendarCheck,
+-  Award,
+-  AlertTriangle,
+-  BookOpen,
+-  ArrowRight,
+-  GraduationCap,
++  Users, CalendarCheck, Award, AlertTriangle,
++  BookOpen, ArrowRight, GraduationCap, RefreshCw, CheckCircle2,
+ } from 'lucide-react';
+ import Sidebar from '@/components/dashboard/Sidebar';
+ import Topbar from '@/components/dashboard/Topbar';
+ import StatCard from '@/components/dashboard/StatCard';
+ import Badge from '@/components/shared/Badge';
+ import DataTable from '@/components/shared/DataTable';
+-import {
+-  BarChart,
+-  Bar,
+-  XAxis,
+-  YAxis,
+-  Tooltip,
+-  ResponsiveContainer,
+-} from 'recharts';
++import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
++
++const RISK_VARIANT: Record<string, 'red' | 'amber' | 'emerald'> = {
++  High: 'red', Medium: 'amber', Low: 'emerald',
++};
++
++interface RosterRow {
++  id: string; name: string; email: string;
++  attendancePct: number; avgQuizScore: number; weakTopic: string;
++  status: string; riskTier?: string; riskReasons?: string[];
++  successScore?: number | null; trend?: string; history?: any[];
++}
++
++function deriveStatus(row: RosterRow): string {
++  if (row.riskTier === 'High')   return 'Needs Attention';
++  if (row.riskTier === 'Medium') return 'Monitor';
++  if (row.avgQuizScore >= 85 && row.attendancePct >= 90) return 'Top Performer';
++  return 'Consistent';
++}
+ 
+ export default function FacultyClassesPage() {
+   const [selectedClass, setSelectedClass] = useState('CSE-A');
++  const [roster, setRoster]               = useState<RosterRow[]>([]);
++  const [weakTopicTrend, setWeakTopicTrend] = useState<{ topic: string; missCount: number }[]>([]);
++  const [cohortStats, setCohortStats]     = useState({ enrolled: 0, avgAttendance: 0, avgScore: 0 });
++  const [loading, setLoading]             = useState(true);
++  const [syncing, setSyncing]             = useState(false);
++  const [syncMsg, setSyncMsg]             = useState('');
++  const [syncSource, setSyncSource]       = useState<'moodle' | 'google_classroom'>('moodle');
+ 
+-  const classRoster = [
+-    {
+-      id: '1',
+-      name: 'Aarav Sharma',
+-      email: 'student@eduvision.ai',
+-      attendancePct: 94,
+-      avgQuizScore: 88,
+-      weakTopic: 'MOSFET Biasing',
+-      status: 'Top Performer',
+-    },
+-    {
+-      id: '2',
+-      name: 'Diya Patel',
+-      email: 'diya@eduvision.ai',
+-      attendancePct: 92,
+-      avgQuizScore: 85,
+-      weakTopic: 'Balanced Trees',
+-      status: 'Consistent',
+-    },
+-    {
+-      id: '3',
+-      name: 'Rohan Verma',
+-      email: 'rohan@eduvision.ai',
+-      attendancePct: 80,
+-      avgQuizScore: 72,
+-      weakTopic: 'CMOS Delay Models',
+-      status: 'Needs Attention',
+-    },
+-  ];
++  // Load real roster + risk data from at-risk API
++  useEffect(() => {
++    setLoading(true);
++    Promise.all([
++      fetch(`/api/at-risk?class=${selectedClass}`).then(r => r.json()),
++      fetch(`/api/attendance?roster=${selectedClass}`).then(r => r.json()),
++    ])
++      .then(([riskData, rosterData]) => {
++        const students: RosterRow[] = (riskData.students || []).map((s: any) => ({
++          id:            s.studentId,
++          name:          s.name,
++          email:         s.email || '',
++          attendancePct: s.attendancePct ?? 0,
++          avgQuizScore:  s.avgQuizScore  ?? 0,
++          weakTopic:     s.riskReasons?.[0]?.includes('quiz') || s.riskReasons?.[0]?.includes('Quiz')
++                           ? (s.riskReasons[0].split(':')[1]?.trim() || 'Review required')
++                           : 'Review required',
++          status:        '',
++          riskTier:      s.riskTier,
++          riskReasons:   s.riskReasons,
++          successScore:  s.successScore,
++          trend:         s.trend,
++          history:       s.history,
++        })).map((r: RosterRow) => ({ ...r, status: deriveStatus(r) }));
+ 
+-  const weakTopicTrend = [
+-    { topic: 'MOSFET Biasing', missCount: 14 },
+-    { topic: 'CMOS Propagation Delay', missCount: 11 },
+-    { topic: 'Sequential Flip-Flops', missCount: 7 },
+-    { topic: 'Timing Skew Margins', missCount: 4 },
+-  ];
++        setRoster(students);
++
++        // Aggregate cohort stats
++        if (students.length) {
++          const avgAtt   = Math.round(students.reduce((s, r) => s + r.attendancePct, 0) / students.length);
++          const avgScore = Math.round(students.reduce((s, r) => s + r.avgQuizScore,  0) / students.length);
++          setCohortStats({ enrolled: students.length, avgAttendance: avgAtt, avgScore });
++        }
++
++        // Build weak topic chart from riskReasons across all students
++        const topicMap: Record<string, number> = {};
++        (riskData.students || []).forEach((s: any) => {
++          (s.riskReasons || []).forEach((reason: string) => {
++            // Extract topic-like phrases from risk reasons
++            const match = reason.match(/quiz|attendance|streak|engagement/i);
++            if (match) {
++              const key = reason.length > 50 ? reason.slice(0, 50) + 'ΓÇª' : reason;
++              topicMap[key] = (topicMap[key] || 0) + 1;
++            }
++          });
++        });
++        const chart = Object.entries(topicMap)
++          .sort((a, b) => b[1] - a[1])
++          .slice(0, 5)
++          .map(([topic, missCount]) => ({ topic, missCount }));
++        setWeakTopicTrend(chart.length ? chart : [
++          { topic: 'No risk factors detected', missCount: 0 },
++        ]);
++      })
++      .catch(() => {
++        // Graceful fallback ΓÇö keep empty state
++      })
++      .finally(() => setLoading(false));
++  }, [selectedClass]);
++
++  const handleLmsSync = async () => {
++    setSyncing(true); setSyncMsg('');
++    try {
++      const res  = await fetch('/api/lms-sync', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({ source: syncSource }),
++      });
++      const data = await res.json();
++      if (data.success) {
++        setSyncMsg(`Synced ${data.count} course(s) from ${syncSource === 'moodle' ? 'Moodle' : 'Google Classroom'}.`);
++      } else {
++        setSyncMsg(data.error || 'Sync failed.');
++      }
++    } catch {
++      setSyncMsg('Sync failed ΓÇö check LMS credentials in .env.local.');
++    } finally {
++      setSyncing(false);
++    }
++  };
+ 
+   const columns = [
+-    { header: 'Student Name', accessorKey: 'name' as const, className: 'font-semibold text-slate-900' },
+-    { header: 'Email ID', accessorKey: 'email' as const, className: 'font-mono text-xs text-slate-500' },
++    { header: 'Student Name',  accessorKey: 'name'  as const, className: 'font-semibold text-slate-900' },
++    { header: 'Email ID',      accessorKey: 'email' as const, className: 'font-mono text-xs text-slate-500' },
+     {
+       header: 'Attendance %',
+-      cell: (row: any) => (
+-        <span className={`font-mono font-bold ${row.attendancePct >= 85 ? 'text-emerald-700' : 'text-amber-700'}`}>
++      cell: (row: RosterRow) => (
++        <span className={`font-mono font-bold ${row.attendancePct >= 85 ? 'text-emerald-700' : row.attendancePct >= 75 ? 'text-amber-700' : 'text-rose-700'}`}>
+           {row.attendancePct}%
+         </span>
+       ),
+     },
+     {
+       header: 'Avg. Score',
+-      cell: (row: any) => <span className="font-mono text-indigo-600 font-bold">{row.avgQuizScore}%</span>,
++      cell: (row: RosterRow) => <span className="font-mono text-indigo-600 font-bold">{row.avgQuizScore}%</span>,
+     },
+     {
+-      header: 'Identified Weak Concept',
+-      cell: (row: any) => (
+-        <Badge variant="amber" size="sm">
+-          {row.weakTopic}
+-        </Badge>
+-      ),
++      header: 'Success Score',
++      cell: (row: RosterRow) => row.successScore != null ? (
++        <span className={`font-mono font-bold ${
++          row.successScore >= 70 ? 'text-emerald-700' : row.successScore >= 45 ? 'text-amber-700' : 'text-rose-700'
++        }`}>
++          {row.successScore}
++          <span className="text-[10px] font-normal text-slate-400 ml-0.5">/100</span>
++        </span>
++      ) : <span className="text-slate-400 text-xs">ΓÇö</span>,
++    },
++    {
++      header: 'Risk Tier',
++      cell: (row: RosterRow) => row.riskTier ? (
++        <div className="group relative inline-block">
++          <Badge variant={RISK_VARIANT[row.riskTier] ?? 'slate'} size="sm">{row.riskTier}</Badge>
++          {row.riskReasons?.[0] && (
++            <div className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-10 w-56 p-2 rounded-lg bg-slate-900 text-white text-[10px] leading-relaxed shadow-xl">
++              {row.riskReasons[0]}
++            </div>
++          )}
++        </div>
++      ) : <span className="text-slate-400 text-xs">ΓÇö</span>,
+     },
+     {
+       header: 'Standing',
+-      cell: (row: any) => (
+-        <Badge variant={row.status === 'Top Performer' ? 'indigo' : row.status === 'Consistent' ? 'emerald' : 'red'} size="sm">
++      cell: (row: RosterRow) => (
++        <Badge variant={row.status === 'Top Performer' ? 'indigo' : row.status === 'Consistent' ? 'emerald' : row.status === 'Needs Attention' ? 'red' : 'amber'} size="sm">
+           {row.status}
+         </Badge>
+       ),
+     },
+   ];
+ 
++  const highRiskCount = roster.filter(r => r.riskTier === 'High').length;
++
+   return (
+     <div className="flex min-h-screen bg-[#F8FAFC] text-slate-900">
+       <Sidebar role="faculty" />
+@@ -109,94 +184,95 @@ export default function FacultyClassesPage() {
+           {/* Header */}
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+             <div>
+-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+-                Class Performance & Cohort Analytics
+-              </h1>
+-              <p className="text-xs text-slate-500 mt-1">
+-                Real-time correlation between attendance rates and diagnostic quiz outcomes.
+-              </p>
++              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Class Performance & Cohort Analytics</h1>
++              <p className="text-xs text-slate-500 mt-1">Real-time correlation between attendance rates and diagnostic quiz outcomes.</p>
+             </div>
+-
+-            <div className="flex items-center gap-2">
++            <div className="flex items-center gap-2 flex-wrap">
+               <select
+                 value={selectedClass}
+-                onChange={(e) => setSelectedClass(e.target.value)}
++                onChange={e => setSelectedClass(e.target.value)}
+                 className="bg-white border border-slate-300 text-xs font-semibold text-slate-800 rounded-xl px-3 py-2 outline-none shadow-2xs"
+               >
+                 <option value="CSE-A">Cohort CSE-A (Digital Electronics)</option>
+                 <option value="CSE-B">Cohort CSE-B (Data Structures)</option>
+               </select>
++
++              {/* LMS Sync */}
++              <select
++                value={syncSource}
++                onChange={e => setSyncSource(e.target.value as any)}
++                className="bg-white border border-slate-300 text-xs font-semibold text-slate-800 rounded-xl px-3 py-2 outline-none shadow-2xs"
++              >
++                <option value="moodle">Moodle</option>
++                <option value="google_classroom">Google Classroom</option>
++              </select>
++              <button
++                onClick={handleLmsSync}
++                disabled={syncing}
++                className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
++              >
++                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
++                {syncing ? 'SyncingΓÇª' : 'Sync LMS'}
++              </button>
+             </div>
+           </div>
+ 
++          {syncMsg && (
++            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
++              className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2"
++            >
++              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />{syncMsg}
++            </motion.div>
++          )}
++
+           {/* Metric Overview */}
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+-            <StatCard
+-              title="Enrolled Cohort"
+-              value="60 Students"
+-              subtitle="Section CSE-A ΓÇó Semester 4"
+-              icon={Users}
+-              accentColor="indigo"
+-            />
+-            <StatCard
+-              title="Cohort Attendance"
+-              value="93.4%"
+-              subtitle="+2.4% above institutional avg"
+-              icon={CalendarCheck}
+-              trend={{ value: '2.4%', isPositive: true }}
+-              accentColor="emerald"
+-            />
+-            <StatCard
+-              title="Average Quiz Score"
+-              value="84.6%"
+-              subtitle="Based on 4 diagnostic assessments"
+-              icon={Award}
+-              accentColor="cyan"
+-            />
+-            <StatCard
+-              title="Flagged for Review"
+-              value="3 Students"
+-              subtitle="Attendance < 80% or Quiz < 65%"
+-              icon={AlertTriangle}
+-              accentColor="amber"
+-            />
++            {loading ? (
++              Array.from({ length: 4 }).map((_, i) => (
++                <div key={i} className="study-card p-5 space-y-3 animate-pulse">
++                  <div className="h-3 w-24 bg-slate-200 rounded" />
++                  <div className="h-7 w-16 bg-slate-200 rounded" />
++                  <div className="h-2.5 w-32 bg-slate-100 rounded" />
++                </div>
++              ))
++            ) : (
++              <>
++                <StatCard title="Enrolled Cohort"    value={`${cohortStats.enrolled || 'ΓÇö'} Students`} subtitle={`Section ${selectedClass} ΓÇó Current Semester`}       icon={Users}         accentColor="indigo" />
++                <StatCard title="Cohort Attendance"  value={cohortStats.avgAttendance ? `${cohortStats.avgAttendance}%` : 'ΓÇö'} subtitle="Average across enrolled students" icon={CalendarCheck} accentColor="emerald" />
++                <StatCard title="Average Quiz Score" value={cohortStats.avgScore ? `${cohortStats.avgScore}%` : 'ΓÇö'}         subtitle="Based on all quiz attempts"       icon={Award}         accentColor="cyan" />
++                <StatCard title="High-Risk Students" value={`${highRiskCount} Student${highRiskCount !== 1 ? 's' : ''}`} subtitle="Success score below 45" icon={AlertTriangle} accentColor="amber" />
++              </>
++            )}
+           </div>
+ 
+-          {/* Weak Topic Cohort Breakdown */}
++          {/* Weak Topic Chart + Pedagogical Suggestion */}
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+             <div className="lg:col-span-8 study-card p-6">
+               <div className="flex items-center justify-between mb-4">
+                 <div>
+                   <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                     <AlertTriangle className="w-4 h-4 text-amber-600" />
+-                    Cohort Weak-Topic Distribution (Frequency of Missed Concepts)
++                    Cohort Risk Factor Distribution
+                   </h3>
+-                  <p className="text-xs text-slate-500">Identifies concepts requiring re-explanation in the next lecture session</p>
++                  <p className="text-xs text-slate-500">Aggregated from live student success scores</p>
+                 </div>
+               </div>
+-
+               <div className="h-60 w-full">
+-                <ResponsiveContainer width="100%" height="100%">
+-                  <BarChart data={weakTopicTrend} layout="vertical" margin={{ top: 10, right: 20, left: 60, bottom: 0 }}>
+-                    <XAxis type="number" stroke="#94A3B8" fontSize={11} />
+-                    <YAxis dataKey="topic" type="category" stroke="#475569" fontSize={11} width={130} />
+-                    <Tooltip
+-                      contentStyle={{
+-                        backgroundColor: '#FFFFFF',
+-                        borderColor: '#E2E8F0',
+-                        borderRadius: '12px',
+-                        fontSize: '12px',
+-                        color: '#0F172A',
+-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+-                      }}
+-                    />
+-                    <Bar dataKey="missCount" fill="#F59E0B" radius={[0, 6, 6, 0]} name="Students Missed" />
+-                  </BarChart>
+-                </ResponsiveContainer>
++                {loading ? (
++                  <div className="h-full flex items-center justify-center text-xs text-slate-400">Loading cohort dataΓÇª</div>
++                ) : (
++                  <ResponsiveContainer width="100%" height="100%">
++                    <BarChart data={weakTopicTrend} layout="vertical" margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
++                      <XAxis type="number" stroke="#94A3B8" fontSize={11} />
++                      <YAxis dataKey="topic" type="category" stroke="#475569" fontSize={10} width={200} />
++                      <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '12px', color: '#0F172A' }} />
++                      <Bar dataKey="missCount" fill="#F59E0B" radius={[0, 6, 6, 0]} name="Students Affected" />
++                    </BarChart>
++                  </ResponsiveContainer>
++                )}
+               </div>
+             </div>
+ 
+-            {/* AI Pedagogical Suggestion card */}
+             <div className="lg:col-span-4 study-card p-6 flex flex-col justify-between">
+               <div>
+                 <div className="flex items-center gap-2 mb-3">
+@@ -205,20 +281,22 @@ export default function FacultyClassesPage() {
+                   </div>
+                   <h3 className="text-sm font-bold text-slate-900">Pedagogical Suggestion</h3>
+                 </div>
+-
+-                <p className="text-xs text-slate-700 leading-relaxed mb-4">
+-                  <strong className="text-amber-800">MOSFET Biasing</strong> was missed by 23% of Section CSE-A in the latest quiz.
+-                </p>
+-
+-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
+-                  <p className="font-semibold text-slate-900">Recommended Action:</p>
+-                  <p>ΓÇó Dedicate the first 10 minutes of Monday's session to small-signal numerical derivations.</p>
+-                  <p>ΓÇó Push an automated 3-question follow-up micro quiz to student dashboards.</p>
+-                </div>
++                {weakTopicTrend[0] && weakTopicTrend[0].missCount > 0 ? (
++                  <>
++                    <p className="text-xs text-slate-700 leading-relaxed mb-4">
++                      <strong className="text-amber-800">{weakTopicTrend[0].topic}</strong> is the top risk factor affecting {weakTopicTrend[0].missCount} student{weakTopicTrend[0].missCount !== 1 ? 's' : ''} in {selectedClass}.
++                    </p>
++                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
++                      <p className="font-semibold text-slate-900">Recommended Action:</p>
++                      <p>ΓÇó Address this in the next lecture session with targeted examples.</p>
++                      <p>ΓÇó Push a follow-up micro quiz to reinforce the concept.</p>
++                    </div>
++                  </>
++                ) : (
++                  <p className="text-xs text-slate-500">No significant risk factors detected for this cohort.</p>
++                )}
+               </div>
+-
+-              <a
+-                href="/faculty/quizzes/create"
++              <a href="/faculty/quizzes/create"
+                 className="mt-4 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+               >
+                 <span>Author Targeted Remediation Quiz</span>
+@@ -227,19 +305,20 @@ export default function FacultyClassesPage() {
+             </div>
+           </div>
+ 
+-          {/* Student Roster Table */}
++          {/* Student Roster Table with Risk Tier + Success Score */}
+           <div className="study-card p-6 space-y-4">
+             <div className="flex items-center justify-between">
+               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                 <Users className="w-4 h-4 text-indigo-600" />
+                 Active Class Roster
+               </h3>
+-              <Badge variant="indigo" size="sm">
+-                MongoDB Synchronized
+-              </Badge>
++              <Badge variant="indigo" size="sm">Risk tiers from StudentScore ΓÇö hover for reason</Badge>
+             </div>
+-
+-            <DataTable columns={columns} data={classRoster} />
++            {loading ? (
++              <div className="py-8 text-center text-xs text-slate-400">Loading rosterΓÇª</div>
++            ) : (
++              <DataTable columns={columns} data={roster} />
++            )}
+           </div>
+         </main>
+       </div>

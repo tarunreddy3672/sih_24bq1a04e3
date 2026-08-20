@@ -1,0 +1,503 @@
+﻿diff --git a/src/app/page.tsx b/src/app/page.tsx
+index c41d28a..71fdcac 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -1,279 +1,299 @@
+ 'use client';
+ 
+-import React from 'react';
++import React, { useRef } from 'react';
+ import Link from 'next/link';
+-import { motion } from 'framer-motion';
+ import {
+-  GraduationCap,
+-  ArrowRight,
+-  ShieldCheck,
+-  Users,
+-  Camera,
+-  BookOpen,
+-  Lock,
+-  CheckCircle2,
++  motion,
++  useScroll,
++  useTransform,
++  useSpring,
++  useInView,
++} from 'framer-motion';
++import {
++  GraduationCap, ArrowRight, ShieldCheck, Camera,
++  BookOpen, Lock,
+ } from 'lucide-react';
+ import Hero3D from '@/components/landing/Hero3D';
+ import FeaturesGrid from '@/components/landing/FeaturesGrid';
+ 
++/* ΓöÇΓöÇ Floating orb background ΓöÇΓöÇ */
++function Orb({ className }: { className: string; }) {
++  return <div className={`absolute rounded-full blur-3xl pointer-events-none ${className}`} />;
++}
++
++/* ΓöÇΓöÇ Animated counter ΓöÇΓöÇ */
++function StatItem({ value, label, color }: { value: string; label: string; color: string }) {
++  const ref = useRef(null);
++  const inView = useInView(ref, { once: true });
++  return (
++    <motion.div
++      ref={ref}
++      initial={{ opacity: 0, y: 20 }}
++      animate={inView ? { opacity: 1, y: 0 } : {}}
++      transition={{ duration: 0.5 }}
++    >
++      <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
++      <p className="text-xs text-slate-500">{label}</p>
++    </motion.div>
++  );
++}
++
++/* ΓöÇΓöÇ Role card ΓöÇΓöÇ */
++function RoleCard({
++  href, icon: Icon, title, route, desc, color, delay,
++}: {
++  href: string; icon: React.FC<{ className?: string }>; title: string; route: string;
++  desc: string; color: string; delay: number;
++}) {
++  return (
++    <motion.div
++      initial={{ opacity: 0, y: 30 }}
++      whileInView={{ opacity: 1, y: 0 }}
++      viewport={{ once: true }}
++      transition={{ delay, duration: 0.55 }}
++      whileHover={{ y: -6, scale: 1.02 }}
++    >
++      <Link href={href} className="glass-card glass-card-hover p-6 flex flex-col gap-3 block">
++        <div className="flex items-center gap-3">
++          <div className={`w-11 h-11 rounded-xl flex items-center justify-center bg-white/5 border border-white/10 ${color}`}>
++            <Icon className="w-5 h-5" />
++          </div>
++          <div>
++            <h3 className="text-sm font-bold text-white">{title}</h3>
++            <span className={`text-[11px] font-mono ${color}`}>{route}</span>
++          </div>
++        </div>
++        <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
++      </Link>
++    </motion.div>
++  );
++}
++
++/* ΓöÇΓöÇ Architecture step ΓöÇΓöÇ */
++function ArchStep({ num, title, desc, delay }: { num: string; title: string; desc: string; delay: number }) {
++  return (
++    <motion.div
++      initial={{ opacity: 0, scale: 0.9 }}
++      whileInView={{ opacity: 1, scale: 1 }}
++      viewport={{ once: true }}
++      transition={{ delay, duration: 0.5 }}
++      whileHover={{ y: -4 }}
++      className="glass-card p-5 text-center flex flex-col items-center gap-3"
++    >
++      <div className="w-9 h-9 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-mono font-bold text-xs">
++        {num}
++      </div>
++      <h4 className="text-sm font-bold text-white">{title}</h4>
++      <p className="text-xs text-slate-400">{desc}</p>
++    </motion.div>
++  );
++}
++
+ export default function LandingPage() {
++  const heroRef = useRef(null);
++  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
++  const yParallax  = useTransform(scrollYProgress, [0, 1], [0, -120]);
++  const opacityOut = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
++  const springY    = useSpring(yParallax, { stiffness: 80, damping: 20 });
++
+   return (
+-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 study-grid-bg relative overflow-x-hidden">
+-      {/* Navigation */}
+-      <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-20">
++    <div className="min-h-screen mesh-bg text-slate-200 relative overflow-x-hidden">
++      {/* Ambient orbs */}
++      <Orb className="w-[600px] h-[600px] bg-indigo-600/20 top-[-200px] left-[-200px]" />
++      <Orb className="w-[500px] h-[500px] bg-sky-500/15 top-[200px] right-[-150px]" />
++      <Orb className="w-[400px] h-[400px] bg-purple-600/10 bottom-[400px] left-[30%]" />
++
++      {/* ΓöÇΓöÇ Nav ΓöÇΓöÇ */}
++      <motion.header
++        initial={{ opacity: 0, y: -20 }}
++        animate={{ opacity: 1, y: 0 }}
++        transition={{ duration: 0.5 }}
++        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-30"
++      >
+         <Link href="/" className="flex items-center gap-2.5 group">
+-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform text-white">
++          <motion.div
++            whileHover={{ scale: 1.1, rotate: 5 }}
++            className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center glow-indigo text-white"
++          >
+             <GraduationCap className="w-5 h-5" />
+-          </div>
+-          <span className="text-xl font-bold tracking-tight text-slate-900">
+-            EduVision
+-          </span>
++          </motion.div>
++          <span className="text-xl font-bold tracking-tight text-white">EduVision</span>
+         </Link>
+ 
+         <div className="flex items-center gap-3">
+-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-xs text-slate-600 shadow-2xs">
+-            <span className="w-2 h-2 rounded-full bg-emerald-500 live-indicator" />
++          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full glass-card text-xs text-slate-300">
++            <span className="w-2 h-2 rounded-full bg-emerald-400 live-indicator" />
+             <span>SIH 2026 Academic Edition</span>
+           </div>
+-          <Link
+-            href="/login"
+-            className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+-          >
+-            <span>Launch Portal</span>
+-            <ArrowRight className="w-3.5 h-3.5" />
+-          </Link>
++          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
++            <Link
++              href="/login"
++              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors glow-indigo flex items-center gap-1.5"
++            >
++              <span>Launch Portal</span>
++              <ArrowRight className="w-3.5 h-3.5" />
++            </Link>
++          </motion.div>
+         </div>
+-      </header>
++      </motion.header>
+ 
+-      {/* Hero Section */}
+-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-14 relative z-10">
++      {/* ΓöÇΓöÇ Hero ΓöÇΓöÇ */}
++      <section ref={heroRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-16 relative z-10">
+         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+-          {/* Left Column: Copy & Actions */}
+-          <div className="lg:col-span-7 text-left space-y-6">
++
++          {/* Left copy */}
++          <motion.div style={{ y: springY, opacity: opacityOut }} className="lg:col-span-7 space-y-6">
+             <motion.div
+-              initial={{ opacity: 0, y: 12 }}
+-              animate={{ opacity: 1, y: 0 }}
+-              transition={{ duration: 0.4 }}
+-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-xs font-semibold text-indigo-700"
++              initial={{ opacity: 0, x: -20 }}
++              animate={{ opacity: 1, x: 0 }}
++              transition={{ duration: 0.5 }}
++              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-xs font-semibold text-indigo-400"
+             >
+               <BookOpen className="w-3.5 h-3.5" />
+-              <span>Smart Education Intelligence Platform</span>
++              Smart Education Intelligence Platform
+             </motion.div>
+ 
+             <motion.h1
+-              initial={{ opacity: 0, y: 15 }}
++              initial={{ opacity: 0, y: 25 }}
+               animate={{ opacity: 1, y: 0 }}
+-              transition={{ duration: 0.5, delay: 0.1 }}
+-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15]"
++              transition={{ duration: 0.6, delay: 0.1 }}
++              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.12] text-white"
+             >
+               Education that <br />
+               <span className="text-gradient-academic">understands every</span> student.
+             </motion.h1>
+ 
+             <motion.p
+-              initial={{ opacity: 0, y: 15 }}
++              initial={{ opacity: 0, y: 25 }}
+               animate={{ opacity: 1, y: 0 }}
+-              transition={{ duration: 0.5, delay: 0.2 }}
+-              className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed"
++              transition={{ duration: 0.6, delay: 0.2 }}
++              className="text-base sm:text-lg text-slate-400 max-w-xl leading-relaxed"
+             >
+               A unified academic ecosystem combining contactless biometric attendance, personalized Claude AI study synthesis, real-time faculty analytics, and an institutional command control tower.
+             </motion.p>
+ 
+-            {/* CTAs */}
+             <motion.div
+-              initial={{ opacity: 0, y: 15 }}
++              initial={{ opacity: 0, y: 25 }}
+               animate={{ opacity: 1, y: 0 }}
+-              transition={{ duration: 0.5, delay: 0.3 }}
++              transition={{ duration: 0.6, delay: 0.3 }}
+               className="flex flex-wrap items-center gap-3.5 pt-1"
+             >
+-              <Link
+-                href="/login"
+-                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-200 flex items-center gap-2 group transition-all"
+-              >
+-                <span>Explore Platform</span>
+-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+-              </Link>
+-              <Link
+-                href="/login"
+-                className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-sm shadow-2xs transition-all flex items-center gap-2"
+-              >
+-                <Lock className="w-4 h-4 text-slate-500" />
+-                <span>Sign In with Role</span>
+-              </Link>
++              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
++                <Link
++                  href="/login"
++                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm glow-indigo flex items-center gap-2 group transition-colors"
++                >
++                  Explore Platform
++                  <motion.span animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
++                    <ArrowRight className="w-4 h-4" />
++                  </motion.span>
++                </Link>
++              </motion.div>
++              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
++                <Link
++                  href="/login"
++                  className="px-6 py-3 rounded-xl glass-card hover:bg-white/8 text-slate-200 font-semibold text-sm flex items-center gap-2 transition-colors"
++                >
++                  <Lock className="w-4 h-4 text-slate-400" />
++                  Sign In with Role
++                </Link>
++              </motion.div>
+             </motion.div>
+ 
+-            {/* Academic Highlights */}
++            {/* Stats */}
+             <motion.div
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+-              transition={{ duration: 0.5, delay: 0.4 }}
+-              className="grid grid-cols-3 gap-3 pt-6 border-t border-slate-200"
++              transition={{ delay: 0.5 }}
++              className="grid grid-cols-3 gap-4 pt-6 border-t border-white/8"
+             >
+-              <div>
+-                <p className="text-xl font-bold text-slate-900 font-mono">99.2%</p>
+-                <p className="text-xs text-slate-500">Biometric Accuracy</p>
+-              </div>
+-              <div>
+-                <p className="text-xl font-bold text-indigo-600 font-mono">&lt;100ms</p>
+-                <p className="text-xs text-slate-500">AI Diagnostic Speed</p>
+-              </div>
+-              <div>
+-                <p className="text-xl font-bold text-emerald-600 font-mono">Zero</p>
+-                <p className="text-xs text-slate-500">Answer Leakage</p>
+-              </div>
++              <StatItem value="99.2%" label="Biometric Accuracy"  color="text-white" />
++              <StatItem value="<100ms" label="AI Diagnostic Speed" color="text-indigo-400" />
++              <StatItem value="Zero"   label="Answer Leakage"      color="text-emerald-400" />
+             </motion.div>
+-          </div>
++          </motion.div>
+ 
+-          {/* Right Column: 3D Academic Object */}
+-          <div className="lg:col-span-5 relative flex items-center justify-center">
++          {/* Right 3D */}
++          <div className="lg:col-span-5 relative">
+             <motion.div
+-              initial={{ opacity: 0, scale: 0.95 }}
+-              animate={{ opacity: 1, scale: 1 }}
+-              transition={{ duration: 0.6 }}
++              initial={{ opacity: 0, scale: 0.9, rotateY: -15 }}
++              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
++              transition={{ duration: 0.8, delay: 0.2 }}
+               className="w-full"
+             >
+               <Hero3D />
+-              <p className="text-center text-[11px] text-slate-500 font-medium mt-1">
+-                Interactive Academic Knowledge Core ΓÇö Click & Drag to Rotate
++              <p className="text-center text-[11px] text-slate-500 mt-1">
++                Interactive Academic Knowledge Core ΓÇö Click &amp; Drag to Rotate
+               </p>
+             </motion.div>
+           </div>
+         </div>
+       </section>
+ 
+-      {/* Role Direct Navigation Section */}
+-      <section className="py-12 bg-white border-y border-slate-200 relative z-10">
++      {/* ΓöÇΓöÇ Role Navigation ΓöÇΓöÇ */}
++      <section className="py-14 relative z-10 border-y border-white/6">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+-          <div className="text-center mb-8">
+-            <h2 className="text-base font-bold text-slate-900 uppercase tracking-wider">
+-              Quick Role Navigation for Hackathon Demonstration
++          <motion.div
++            initial={{ opacity: 0, y: 15 }}
++            whileInView={{ opacity: 1, y: 0 }}
++            viewport={{ once: true }}
++            className="text-center mb-10"
++          >
++            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-widest">
++              Quick Role Navigation ΓÇö Hackathon Demo
+             </h2>
+-            <p className="text-xs text-slate-500 mt-1">
+-              Select any role to jump directly into the live workspace:
+-            </p>
+-          </div>
++            <p className="text-xs text-slate-500 mt-1">Select any role to jump directly into the live workspace</p>
++          </motion.div>
+ 
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+-            <Link
+-              href="/student/dashboard"
+-              className="study-card p-6 study-card-hover border-indigo-100 group"
+-            >
+-              <div className="flex items-center gap-3 mb-3">
+-                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 group-hover:scale-105 transition-transform">
+-                  <GraduationCap className="w-5 h-5" />
+-                </div>
+-                <div>
+-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+-                    Student Experience
+-                  </h3>
+-                  <span className="text-[11px] text-indigo-600 font-medium font-mono">/student/dashboard</span>
+-                </div>
+-              </div>
+-              <p className="text-xs text-slate-600 leading-relaxed">
+-                Personalized attendance rate, streak flames, Claude AI study plan, AI doubt tutor, and timed MCQ quizzes.
+-              </p>
+-            </Link>
+-
+-            <Link
+-              href="/faculty/attendance"
+-              className="study-card p-6 study-card-hover border-emerald-100 group"
+-            >
+-              <div className="flex items-center gap-3 mb-3">
+-                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:scale-105 transition-transform">
+-                  <Camera className="w-5 h-5" />
+-                </div>
+-                <div>
+-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
+-                    Faculty Biometric Console
+-                  </h3>
+-                  <span className="text-[11px] text-emerald-600 font-medium font-mono">/faculty/attendance</span>
+-                </div>
+-              </div>
+-              <p className="text-xs text-slate-600 leading-relaxed">
+-                Live facial detection, descriptor matching with enrolled embeddings, quiz creator, and class roster analytics.
+-              </p>
+-            </Link>
+-
+-            <Link
+-              href="/admin/control-tower"
+-              className="study-card p-6 study-card-hover border-amber-100 group"
+-            >
+-              <div className="flex items-center gap-3 mb-3">
+-                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:scale-105 transition-transform">
+-                  <ShieldCheck className="w-5 h-5" />
+-                </div>
+-                <div>
+-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-700 transition-colors">
+-                    Institutional Control Tower
+-                  </h3>
+-                  <span className="text-[11px] text-amber-700 font-medium font-mono">/admin/control-tower</span>
+-                </div>
+-              </div>
+-              <p className="text-xs text-slate-600 leading-relaxed">
+-                Live class grid, dynamic AI Academic Advisory insight card, attendance trends, and deep student profile drill-down.
+-              </p>
+-            </Link>
++            <RoleCard href="/student/dashboard"  icon={GraduationCap} title="Student Experience"          route="/student/dashboard"  color="text-indigo-400" delay={0}    desc="Personalized attendance rate, streak flames, Claude AI study plan, AI doubt tutor, and timed MCQ quizzes." />
++            <RoleCard href="/faculty/attendance" icon={Camera}        title="Faculty Biometric Console"   route="/faculty/attendance" color="text-emerald-400" delay={0.1}  desc="Live facial detection, descriptor matching with enrolled embeddings, quiz creator, and class roster analytics." />
++            <RoleCard href="/admin/control-tower" icon={ShieldCheck}  title="Institutional Control Tower" route="/admin/control-tower" color="text-amber-400"  delay={0.2}  desc="Live class grid, dynamic AI Academic Advisory insight card, attendance trends, and deep student profile drill-down." />
+           </div>
+         </div>
+       </section>
+ 
+-      {/* Features Grid */}
++      {/* ΓöÇΓöÇ Features ΓöÇΓöÇ */}
+       <FeaturesGrid />
+ 
+-      {/* Institutional Architecture Highlights */}
+-      <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-200">
+-        <div className="study-card p-8 sm:p-10 border border-slate-200 relative overflow-hidden bg-white">
+-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto mb-2 font-mono font-bold text-xs">
+-                01
+-              </div>
+-              <h4 className="text-sm font-bold text-slate-900 mb-1">Face Telemetry</h4>
+-              <p className="text-xs text-slate-500">face-api.js descriptors matched against vector embeddings</p>
+-            </div>
+-
+-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto mb-2 font-mono font-bold text-xs">
+-                02
+-              </div>
+-              <h4 className="text-sm font-bold text-slate-900 mb-1">AI Study Synthesis</h4>
+-              <p className="text-xs text-slate-500">Weak topic extraction mapped to personalized revision schedules</p>
+-            </div>
+-
+-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto mb-2 font-mono font-bold text-xs">
+-                03
+-              </div>
+-              <h4 className="text-sm font-bold text-slate-900 mb-1">Server Authorization</h4>
+-              <p className="text-xs text-slate-500">NextAuth JWT with role protection and zero browser trust</p>
+-            </div>
+-
+-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto mb-2 font-mono font-bold text-xs">
+-                04
+-              </div>
+-              <h4 className="text-sm font-bold text-slate-900 mb-1">Control Tower AI</h4>
+-              <p className="text-xs text-slate-500">Institutional anomaly detection and proactive intervention triggers</p>
+-            </div>
+-          </div>
++      {/* ΓöÇΓöÇ Architecture ΓöÇΓöÇ */}
++      <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/6 relative z-10">
++        <motion.div
++          initial={{ opacity: 0, y: 20 }}
++          whileInView={{ opacity: 1, y: 0 }}
++          viewport={{ once: true }}
++          className="text-center mb-10"
++        >
++          <h2 className="text-xl font-bold text-white">System Architecture</h2>
++          <p className="text-xs text-slate-500 mt-1">Four pillars powering the platform</p>
++        </motion.div>
++        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
++          <ArchStep num="01" title="Face Telemetry"       desc="face-api.js descriptors matched against vector embeddings"                    delay={0} />
++          <ArchStep num="02" title="AI Study Synthesis"   desc="Weak topic extraction mapped to personalized revision schedules"              delay={0.1} />
++          <ArchStep num="03" title="Server Authorization" desc="NextAuth JWT with role protection and zero browser trust"                     delay={0.2} />
++          <ArchStep num="04" title="Control Tower AI"     desc="Institutional anomaly detection and proactive intervention triggers"          delay={0.3} />
+         </div>
+       </section>
+ 
+-      {/* Footer */}
+-      <footer className="border-t border-slate-200 py-8 bg-slate-100 text-xs text-slate-500 text-center">
++      {/* ΓöÇΓöÇ Footer ΓöÇΓöÇ */}
++      <motion.footer
++        initial={{ opacity: 0 }}
++        whileInView={{ opacity: 1 }}
++        viewport={{ once: true }}
++        className="border-t border-white/6 py-8 text-xs text-slate-500 text-center relative z-10"
++      >
+         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+           <p>┬⌐ 2026 EduVision ΓÇö Smart India Hackathon Architecture</p>
+-          <div className="flex items-center gap-4 text-slate-600">
+-            <span>Next.js App Router</span>
+-            <span>ΓÇó</span>
+-            <span>MongoDB</span>
+-            <span>ΓÇó</span>
+-            <span>Claude AI</span>
+-            <span>ΓÇó</span>
+-            <span>face-api.js</span>
++          <div className="flex items-center gap-3 text-slate-600">
++            {['Next.js App Router', 'MongoDB', 'Claude AI', 'face-api.js'].map((t, i) => (
++              <React.Fragment key={t}>
++                {i > 0 && <span>ΓÇó</span>}
++                <span>{t}</span>
++              </React.Fragment>
++            ))}
+           </div>
+         </div>
+-      </footer>
++      </motion.footer>
+     </div>
+   );
+ }

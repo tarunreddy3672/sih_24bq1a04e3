@@ -31,7 +31,7 @@ export async function POST() {
           faceEmbedding: u.faceEmbedding || [],
           passwordHash: defaultPasswordHash,
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     }
 
