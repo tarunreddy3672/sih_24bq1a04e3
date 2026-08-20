@@ -1,0 +1,23 @@
+[33mcommit b2dd4e2b62ad5c3cfccbb21ee2efcf7047738945[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: tarun <tarun10082006@gmail.com>
+Date:   Thu Aug 20 20:44:27 2026 +0530
+
+    initial commit
+
+[33mcommit 02271954e198da2f2014719a1d8facca1dc8614e[m
+Author: tarun <tarun10082006@gmail.com>
+Date:   Mon Aug 17 21:32:19 2026 +0530
+
+    feat: redesign web theme to pleasant academic study environment
+
+[33mcommit 49fc3a2006060666252eca660e40365a2ebfa5ba[m
+Author: tarun <tarun10082006@gmail.com>
+Date:   Mon Aug 17 21:03:35 2026 +0530
+
+    feat: complete full-stack smart education dashboard for SIH hackathon
+
+[33mcommit 4f9e55a516e2013edb96e7f4e5255be580c275cb[m
+Author: tarun <tarun10082006@gmail.com>
+Date:   Mon Aug 17 20:50:17 2026 +0530
+
+    Initial commit from Create Next App
